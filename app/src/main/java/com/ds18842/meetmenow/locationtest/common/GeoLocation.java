@@ -46,6 +46,9 @@ public class GeoLocation implements Parcelable, Serializable {
 
 
     public double getDistance(GeoLocation l){
+        if (l == null)
+            return 1e10;
+
         return distFrom(l.getLat(), l.getLng(), getLat(), getLng());
     }
 

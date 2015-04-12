@@ -34,6 +34,7 @@ public class NetworkManager implements IMessageHandler {
         if (msg.getType() == Packet.BROADCAST){
             //TODO check if it's a new broadcast to re-do
             //TODO broadcast if #id of packet is new
+            //TODO update logic about this broadcast
             this.broadcast(msg);
         }else{
             receiver.receive(msg);
@@ -55,7 +56,10 @@ public class NetworkManager implements IMessageHandler {
     public void broadcast(Packet msg) {
         ArrayList<Neighbour> neighbors = peerManager.getNeighbors() ;
         for (Neighbour neighbor : neighbors) {
-            //TODO if msg.getPrev() == neighbor.getNode() ... don't send it back
+            if (msg.getPrev().getName().equals(neighbor.getNode().getName())){
+                //Don't broadcast it back to the node you get the message from.
+                continue;
+            }
             msg.setHop(me, neighbor.getNode());
             send(msg);
         }

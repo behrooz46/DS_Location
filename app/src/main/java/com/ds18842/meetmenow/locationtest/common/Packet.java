@@ -5,9 +5,10 @@ import android.os.Parcelable;
 
 public class Packet implements Parcelable {
     public static final int MAX_TTL = 20, BROADCAST = 1, LOCATION = 2;
+    private static int MSG_NUM = 0 ;
 
     private Node src, dst, prev, next ;
-    private int type, ttl ;
+    private int id, type, ttl ;
     private String payload ;
 
     public Packet(Node src, Node dst, int type, String payload) {
@@ -17,6 +18,7 @@ public class Packet implements Parcelable {
         this.next = dst;
         this.type = type;
         this.ttl = MAX_TTL;
+        this.id = MSG_NUM++ ;
         this.payload = payload;
     }
 
@@ -28,6 +30,7 @@ public class Packet implements Parcelable {
 
         this.type = pc.readInt() ;
         this.ttl = pc.readInt() ;
+        this.id = pc.readInt() ;
         this.payload = pc.readString() ;
     }
 
@@ -40,6 +43,7 @@ public class Packet implements Parcelable {
 
     public int getType() { return type; }
     public int getTTL() { return ttl; }
+    public int getId() { return id; }
 
     public String getPayload() {
         return payload;
@@ -59,6 +63,7 @@ public class Packet implements Parcelable {
 
         dest.writeInt(type);
         dest.writeInt(ttl);
+        dest.writeInt(id);
         dest.writeString(payload);
     }
 

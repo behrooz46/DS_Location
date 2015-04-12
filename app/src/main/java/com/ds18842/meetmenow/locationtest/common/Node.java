@@ -41,4 +41,8 @@ public class Node implements Parcelable, Serializable{
     public void setGeoLocation(GeoLocation geoLocation) {
         this.geoLocation = geoLocation;
     }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

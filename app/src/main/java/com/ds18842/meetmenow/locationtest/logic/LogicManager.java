@@ -12,30 +12,20 @@ public class LogicManager implements IMessageHandler, ILocationHandler {
 
     private final Context context;
     private IMessageHandler sender;
+    private Node me;
 
     public LogicManager(Context context) {
         this.context = context ;
+        me = new Node(null, null);
     }
 
     public Node getSelfNode() {
-        //TODO return self node
-        return null;
-    }
-
-    //USED by UI
-    public ArrayList <String> getNodeNames(){
-        //TODO return list of all nodes' names
-        return null ;
+        return me;
     }
 
     public ArrayList <Node> getNodes(){
         //TODO return list of all nodes
         return null ;
-    }
-
-    public Node getNode(String name) {
-        //TODO return node with name
-        return null;
     }
 
     @Override
@@ -45,7 +35,6 @@ public class LogicManager implements IMessageHandler, ILocationHandler {
 
     @Override
     public void send(Packet msg) {
-        //TODO call routing.send
         sender.send(msg);
     }
 
@@ -64,20 +53,26 @@ public class LogicManager implements IMessageHandler, ILocationHandler {
     @Override
     public void updateLocation(GeoLocation location) {
         //TODO decide if it should tell UI
-        Node me = getSelfNode() ;
-        if ( me.getGeoLocation().getDistance(location) < LOCATION_CHANGE_THERESHOLD )
+        if ( location.getDistance(me.getGeoLocation()) < LOCATION_CHANGE_THERESHOLD )
             return ;
 
+        //Update my location
         me.setGeoLocation(location);
-        Node src = getSelfNode() ;
-        Node dst = getSelfNode() ;
+        //Boradcast this update
+        Node src = me ;
+        Node dst = me ;
         broadcast(new Packet(src, dst, Packet.BROADCAST, "")) ;
     }
 
     //Called by UI
-    public void sendMessageTo(String name, String content){
-        Node src = getSelfNode() ;
-        Node dst = getNode(name) ;
+    public void sendMessageTo(Node node, String content){
+        Node src = me ;
+        Node dst = node ;
         send(new Packet(src, dst, Packet.LOCATION, content)) ;
+    }
+
+    //Called by UI
+    public void joinTheNetwork(String name) {
+        me.setName(name);
     }
 }

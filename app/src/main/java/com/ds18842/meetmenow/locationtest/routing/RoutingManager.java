@@ -2,6 +2,7 @@ package com.ds18842.meetmenow.locationtest.routing;
 
 import android.content.Context;
 
+import com.ds18842.meetmenow.locationtest.network.PeerManager;
 import com.ds18842.meetmenow.locationtest.network.infrastructure.* ;
 import com.ds18842.meetmenow.locationtest.common.* ;
 import com.ds18842.meetmenow.locationtest.logic.LogicManager;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 
 public class RoutingManager implements IMessageHandler {
     private final Context context;
+    private PeerManager peerManager;
     private LogicManager app;
     private IMessageHandler receiver;
     private IMessageHandler sender;
@@ -17,8 +19,9 @@ public class RoutingManager implements IMessageHandler {
 
     private Node me ;
 
-    public RoutingManager(Context context, LogicManager app){
+    public RoutingManager(Context context, LogicManager app, PeerManager peerManager){
         this.context = context ;
+        this.peerManager = peerManager ;
         this.app = app ;
         this.me = app.getSelfNode();
     }
@@ -52,7 +55,7 @@ public class RoutingManager implements IMessageHandler {
     }
 
     private Node findNextNode(Packet msg) {
-        ArrayList<Neighbour> neighbors = app.getNeighbors() ;
+        ArrayList<Neighbour> neighbors = peerManager.getNeighbors() ;
         Node best = me ; double min_dis = me.getGeoLocation().getDistance(msg.getDst().getGeoLocation()) ;
 
         for (Neighbour neighbor : neighbors) {

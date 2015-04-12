@@ -26,16 +26,17 @@ public class MeetMeNow extends Application{
     public void onCreate() {
         super.onCreate();
 
-
         logicManager = new LogicManager(this);
-
         geoLocationManager = new GeoLocationManager(this);
         networkManager = new NetworkManager(this, logicManager);
         routingManager = new RoutingManager(this, logicManager);
 
+        //========================================= Set Location Handler
+        geoLocationManager.setLocationHandler(logicManager);
+        //========================================= Set Upstream Message
         networkManager.setReceiver(routingManager);
         routingManager.setReceiver(logicManager);
-
+        //========================================= Set Downstrean Message
         logicManager.setSender(routingManager);
         routingManager.setSender(networkManager);
     }

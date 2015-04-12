@@ -3,7 +3,9 @@ package com.ds18842.meetmenow.locationtest.common;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class Node implements Parcelable {
+import java.io.Serializable;
+
+public class Node implements Parcelable, Serializable{
     String name ;
     GeoLocation geoLocation ;
 
@@ -34,5 +36,9 @@ public class Node implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(name);
         dest.writeParcelable(geoLocation, flags);
+    }
+
+    public void setGeoLocation(GeoLocation geoLocation) {
+        this.geoLocation = geoLocation;
     }
 }

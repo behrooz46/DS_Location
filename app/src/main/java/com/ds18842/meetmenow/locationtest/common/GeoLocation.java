@@ -4,7 +4,9 @@ import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class GeoLocation implements Parcelable {
+import java.io.Serializable;
+
+public class GeoLocation implements Parcelable, Serializable {
     Double lng;
     Double lat ;
     Long time;

@@ -10,6 +10,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.ds18842.meetmenow.locationtest.common.GeoLocation;
+import com.ds18842.meetmenow.locationtest.common.ILocationHandler;
 import com.ds18842.meetmenow.locationtest.views.MainActivity;
 
 public class GeoLocationManager extends Service implements LocationListener {
@@ -19,6 +21,7 @@ public class GeoLocationManager extends Service implements LocationListener {
     private final Context context;
 
     private Location location;
+    private ILocationHandler handler;
 
 
     public GeoLocationManager(Context context){
@@ -44,6 +47,9 @@ public class GeoLocationManager extends Service implements LocationListener {
     public void onLocationChanged(Location newLocation){
         if (isBetterLocation(newLocation, location)){
             location = newLocation ;
+            if (handler != null) {
+                handler.updateLocation(new GeoLocation(location));
+            }
             sendLocationToUI(location);
         }
     }
@@ -67,7 +73,9 @@ public class GeoLocationManager extends Service implements LocationListener {
     public Location getLocation() {
         return location;
     }
-
+    public void setLocationHandler(ILocationHandler handler){
+        this.handler = handler ;
+    }
 
 
     /** Determines whether one Location reading is better than the current Location fix

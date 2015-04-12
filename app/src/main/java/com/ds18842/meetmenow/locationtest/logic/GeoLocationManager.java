@@ -1,4 +1,4 @@
-package com.ds18842.meetmenow.locationtest.location;
+package com.ds18842.meetmenow.locationtest.logic;
 
 import android.app.Service;
 import android.content.Context;
@@ -10,12 +10,9 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.ds18842.meetmenow.locationtest.MainActivity;
+import com.ds18842.meetmenow.locationtest.views.MainActivity;
 
-/**
- * Created by behrooz on 4/8/15.
- */
-public class GeoLocationProvider extends Service implements LocationListener {
+public class GeoLocationManager extends Service implements LocationListener {
     private final LocationManager locationManager;
     private static final int TWO_MINUTES = 1000 * 60 * 2;
     private static final int ACCURACY_THRESHOLD_METER = 20;
@@ -24,7 +21,7 @@ public class GeoLocationProvider extends Service implements LocationListener {
     private Location location;
 
 
-    public GeoLocationProvider(Context context){
+    public GeoLocationManager(Context context){
         this.context = context ;
         this.locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 

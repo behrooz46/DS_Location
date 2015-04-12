@@ -1,7 +1,10 @@
-package com.ds18842.meetmenow.locationtest;
+package com.ds18842.meetmenow.locationtest.views;
 
 import android.content.Intent;
 import android.location.Location;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -9,6 +12,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+
+import com.ds18842.meetmenow.locationtest.R;
+import com.ds18842.meetmenow.locationtest.MeetMeNow;
 
 public class MainActivity extends ActionBarActivity {
 

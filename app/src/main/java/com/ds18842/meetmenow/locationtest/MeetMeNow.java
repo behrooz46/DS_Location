@@ -5,6 +5,7 @@ import android.app.Application;
 import com.ds18842.meetmenow.locationtest.logic.GeoLocationManager;
 import com.ds18842.meetmenow.locationtest.logic.LogicManager;
 import com.ds18842.meetmenow.locationtest.network.NetworkManager;
+import com.ds18842.meetmenow.locationtest.network.PeerManager;
 import com.ds18842.meetmenow.locationtest.routing.RoutingManager;
 
 public class MeetMeNow extends Application{
@@ -12,6 +13,7 @@ public class MeetMeNow extends Application{
     private LogicManager logicManager;
     private NetworkManager networkManager;
     private RoutingManager routingManager;
+    private PeerManager peerManager;
 
     public MeetMeNow(){
 
@@ -28,8 +30,9 @@ public class MeetMeNow extends Application{
 
         logicManager = new LogicManager(this);
         geoLocationManager = new GeoLocationManager(this);
-        networkManager = new NetworkManager(this, logicManager);
-        routingManager = new RoutingManager(this, logicManager);
+        peerManager = new PeerManager();
+        networkManager = new NetworkManager(this, logicManager, peerManager);
+        routingManager = new RoutingManager(this, logicManager, peerManager);
 
         //========================================= Set Location Handler
         geoLocationManager.setLocationHandler(logicManager);

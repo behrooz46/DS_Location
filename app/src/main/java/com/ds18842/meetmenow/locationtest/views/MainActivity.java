@@ -1,6 +1,10 @@
 package com.ds18842.meetmenow.locationtest.views;
 
 import android.content.Intent;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.Location;
 import android.os.Handler;
 import android.os.Looper;
@@ -10,18 +14,27 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.ds18842.meetmenow.locationtest.R;
 import com.ds18842.meetmenow.locationtest.MeetMeNow;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements SensorEventListener {
 
     public static final int INTENT_TYPE_LOCATION_CHANGE = 1;
     private TextView txt_latValue, txt_lngValue, txt_timeValue;
     private Button btn_updateLocation;
+    private ImageView image;
     private MeetMeNow app;
+
+    private float currentDegree = 0f;
+    private SensorManager mSensorManager;
+    private TextView tvHeading;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +54,24 @@ public class MainActivity extends ActionBarActivity {
                 locationChange(pos.getLongitude(), pos.getLongitude(), pos.getTime());
             }
         });
+
+
+        image = (ImageView) findViewById(R.id.imageViewCompass);
+        tvHeading = (TextView) findViewById(R.id.tvHeading);
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mSensorManager.unregisterListener(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION), SensorManager.SENSOR_DELAY_GAME);
     }
 
     @Override
@@ -87,5 +118,31 @@ public class MainActivity extends ActionBarActivity {
     }
 
 
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        // get the angle around the z-axis rotated
+        float degree = Math.round(event.values[0]);
+        tvHeading.setText("Heading: " + Float.toString(degree) + " degrees");
+        // create a rotation animation (reverse turn degree degrees)
+        RotateAnimation ra = new RotateAnimation(
+                currentDegree,
+                        -degree,
+                Animation.RELATIVE_TO_SELF, 0.5f,
+                Animation.RELATIVE_TO_SELF,
+        0.5f);
+        // how long the animation will take place
+        ra.setDuration(210);
+        // set the animation after the end of the reservation status
+        ra.setFillAfter(true);
+
+        // Start the animation
+        image.startAnimation(ra);
+        currentDegree = -degree;
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        // not in use
+    }
 
 }

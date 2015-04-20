@@ -13,7 +13,7 @@ public class PeerManager {
 
     public ArrayList<Neighbour> getNeighbors() {
         //TODO return all neighbour
-        return null;
+        return new ArrayList<Neighbour>();
     }
 
     public Neighbour getNeighbor(Node next) {

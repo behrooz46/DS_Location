@@ -6,8 +6,8 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,10 +17,10 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.ds18842.meetmenow.locationtest.R;
 import com.ds18842.meetmenow.locationtest.MeetMeNow;
+import com.ds18842.meetmenow.locationtest.R;
 
-public class MainActivity extends ActionBarActivity implements SensorEventListener {
+public class NavigationActivity extends ActionBarActivity implements SensorEventListener {
 
     public static final int INTENT_TYPE_LOCATION_CHANGE = 1;
     private TextView txt_latValue, txt_lngValue, txt_timeValue;

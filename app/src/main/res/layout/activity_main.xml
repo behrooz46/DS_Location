@@ -41,8 +41,7 @@
         android:layout_height="wrap_content"
         android:text="Send Meet Request"
         android:id="@+id/btn_sendRequest"
-        android:layout_marginBottom="76dp"
-        android:layout_above="@+id/relativeLayout2"
+        android:layout_below="@+id/editText3"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
@@ -76,84 +75,29 @@
         android:layout_alignRight="@+id/txt_lng"
         android:layout_alignEnd="@+id/txt_lng" />
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:padding="10dp"
-        android:background="#41646464"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginBottom="81dp"
-        android:id="@+id/relativeLayout2">
-
-        <Button
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="250px"
-            android:layout_height="wrap_content"
-            android:text="Accept"
-            android:id="@+id/button2"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginLeft="28dp"
-            android:layout_marginStart="28dp" />
-
-        <Button
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="250px"
-            android:layout_height="wrap_content"
-            android:text="Decline"
-            android:id="@+id/button3"
-            android:layout_marginRight="23dp"
-            android:layout_marginEnd="23dp"
-            android:layout_alignTop="@+id/button2"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Meet Request From:"
-            android:id="@+id/textView4"
-            android:layout_alignParentTop="true"
-            android:layout_alignLeft="@+id/button2"
-            android:layout_alignStart="@+id/button2" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="-"
-            android:id="@+id/textView5"
-            android:layout_below="@+id/textView4"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="20dp" />
-    </RelativeLayout>
-
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/editText3"
-        android:text="Short Message"
-        android:layout_above="@+id/btn_sendRequest"
+        android:layout_below="@+id/editText4"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_toLeftOf="@+id/txt_timeValue"
-        android:layout_toStartOf="@+id/txt_timeValue" />
+        android:layout_toStartOf="@+id/txt_timeValue"
+        android:hint="Message" />
 
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:inputType="textPersonName"
-        android:text="Name"
         android:ems="10"
         android:id="@+id/editText4"
-        android:layout_above="@+id/editText3"
+        android:layout_below="@+id/txt_time"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_alignRight="@+id/editText3"
-        android:layout_alignEnd="@+id/editText3" />
+        android:layout_toLeftOf="@+id/txt_timeValue"
+        android:layout_toStartOf="@+id/txt_timeValue"
+        android:layout_marginTop="50dp"
+        android:hint="To:" />
 
 </RelativeLayout>

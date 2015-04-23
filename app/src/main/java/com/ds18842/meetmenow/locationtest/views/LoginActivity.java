@@ -14,63 +14,54 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.ds18842.meetmenow.locationtest.MeetMeNow;
 import com.ds18842.meetmenow.locationtest.R;
 
-public class LoginActivity extends ActionBarActivity implements SensorEventListener {
+public class LoginActivity extends ActionBarActivity {
 
     public static final int INTENT_TYPE_LOCATION_CHANGE = 1;
-    private TextView txt_latValue, txt_lngValue, txt_timeValue;
-    private Button btn_updateLocation;
-    private ImageView image;
+    private EditText txt_login_name, txt_login_email;
+    private Button btn_login_join;
     private MeetMeNow app;
-
-    private float currentDegree = 0f;
-    private SensorManager mSensorManager;
-    private TextView tvHeading;
-    private float magneticNorth;
-    private Location myLocation, destLocation ;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
+        setContentView(R.layout.activity_login);
         app = (MeetMeNow) getApplicationContext();
+        txt_login_name = (EditText) findViewById(R.id.txt_login_name);
+        txt_login_email = (EditText) findViewById(R.id.txt_login_email);
+        btn_login_join = (Button) findViewById(R.id.btn_login_join);
 
-        txt_latValue = (TextView) findViewById(R.id.txt_latValue);
-        txt_lngValue = (TextView) findViewById(R.id.txt_lngValue);
-        txt_timeValue = (TextView) findViewById(R.id.txt_timeValue);
-        btn_updateLocation = (Button) findViewById(R.id.btn_sendRequest);
-        btn_updateLocation.setOnClickListener(new View.OnClickListener() {
+        btn_login_join.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Location pos = app.getGeoLocationProvider().getLocation();
-                locationChange(pos.getLongitude(), pos.getLongitude(), pos.getTime());
+                app.logicManager.joinTheNetwork(txt_login_name.getText().toString());
+                loginCheck();
             }
         });
-
-
-        image = (ImageView) findViewById(R.id.imageViewCompass);
-        tvHeading = (TextView) findViewById(R.id.tvHeading);
-        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mSensorManager.unregisterListener(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION), SensorManager.SENSOR_DELAY_GAME);
+        loginCheck() ;
+    }
+
+    private void loginCheck() {
+        if (app.logicManager.isLoogedIn()){
+            Intent i = new Intent(app, MainActivity.class);
+            startActivity(i);
+        }
     }
 
     @Override
@@ -94,73 +85,4 @@ public class LoginActivity extends ActionBarActivity implements SensorEventListe
 
         return super.onOptionsItemSelected(item);
     }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        if( intent.getIntExtra("type", 0) == INTENT_TYPE_LOCATION_CHANGE ){
-            locationInent(intent);
-        }
-    }
-
-    private void locationInent(Intent intent) {
-        double lng = intent.getDoubleExtra("lng", 0);
-        double lat = intent.getDoubleExtra("lat", 0);
-        long time = intent.getLongExtra("updatedAt", 0);
-        locationChange(lng, lat, time);
-    }
-
-    private void locationChange(double lng, double lat, long time) {
-        txt_lngValue.setText(lng + "");
-        txt_latValue.setText(lat + "");
-        txt_timeValue.setText(time + "");
-    }
-
-
-    private float normalizeDegree(float value) {
-        if (value >= 0.0f && value <= 180.0f) {
-            return value;
-        } else {
-            return 180 + (180 + value);
-        }
-    }
-
-    private float calculateDegree(){
-        float heading = this.magneticNorth;
-        float bearing = myLocation.bearingTo(destLocation);
-        heading = (bearing - heading) * -1;
-        return heading ;
-    }
-
-    public synchronized void updateDirection(){
-        // get the angle around the z-axis rotated
-        float degree = calculateDegree();
-        tvHeading.setText("Heading: " + Float.toString(degree) + " degrees");
-        // create a rotation animation (reverse turn degree degrees)
-        RotateAnimation ra = new RotateAnimation(
-                currentDegree,
-                -degree,
-                Animation.RELATIVE_TO_SELF, 0.5f,
-                Animation.RELATIVE_TO_SELF,
-                0.5f);
-        // how long the animation will take place
-        ra.setDuration(210);
-        // set the animation after the end of the reservation status
-        ra.setFillAfter(true);
-
-        // Start the animation
-        image.startAnimation(ra);
-        currentDegree = -degree;
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        this.magneticNorth = Math.round(event.values[0]);
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // not in use
-    }
-
 }

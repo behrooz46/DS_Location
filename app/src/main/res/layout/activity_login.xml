@@ -10,29 +10,29 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:inputType="textPersonName"
-        android:text="Name"
         android:ems="10"
-        android:id="@+id/editText"
+        android:id="@+id/txt_login_name"
         android:layout_marginTop="168dp"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:hint="Name" />
 
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:inputType="textEmailAddress"
         android:ems="10"
-        android:id="@+id/editText2"
-        android:text="Email"
-        android:layout_below="@+id/editText"
-        android:layout_centerHorizontal="true" />
+        android:id="@+id/txt_login_email"
+        android:layout_below="@+id/txt_login_name"
+        android:layout_centerHorizontal="true"
+        android:hint="Email" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Join"
-        android:id="@+id/button"
-        android:layout_below="@+id/editText2"
+        android:id="@+id/btn_login_join"
+        android:layout_below="@+id/txt_login_email"
         android:layout_centerHorizontal="true" />
 
     <TextView

@@ -10,7 +10,7 @@ import com.ds18842.meetmenow.locationtest.routing.RoutingManager;
 
 public class MeetMeNow extends Application{
     private GeoLocationManager geoLocationManager;
-    private LogicManager logicManager;
+    public LogicManager logicManager;
     private NetworkManager networkManager;
     private RoutingManager routingManager;
     private PeerManager peerManager;
@@ -22,6 +22,7 @@ public class MeetMeNow extends Application{
     public GeoLocationManager getGeoLocationProvider() {
         return geoLocationManager;
     }
+
 
 
     @Override

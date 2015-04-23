@@ -14,6 +14,10 @@ public class LogicManager implements IMessageHandler, ILocationHandler {
     private IMessageHandler sender;
     private Node me;
 
+    public boolean isLoogedIn(){
+        return getSelfNode().getName() != null ;
+    }
+
     public LogicManager(Context context) {
         this.context = context ;
         me = new Node(null, null);
@@ -65,10 +69,20 @@ public class LogicManager implements IMessageHandler, ILocationHandler {
     }
 
     //Called by UI
-    public void sendMessageTo(Node node, String content){
-        Node src = me ;
-        Node dst = node ;
-        send(new Packet(src, dst, Packet.LOCATION, content)) ;
+    public boolean sendMessageTo(String name, String content){
+        Node src = me, dst = null ;
+        for(Node node : getNodes()){
+            if (node.getName().equals(name)){
+                dst = node ;
+                break;
+            }
+        }
+        if (dst == null){
+            return false ;
+        }else{
+            send(new Packet(src, dst, Packet.LOCATION, content)) ;
+            return true ;
+        }
     }
 
     //Called by UI

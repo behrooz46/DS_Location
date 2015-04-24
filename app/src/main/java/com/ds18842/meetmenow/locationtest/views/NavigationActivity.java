@@ -30,7 +30,8 @@ public class NavigationActivity extends ActionBarActivity implements SensorEvent
     private SensorManager mSensorManager;
     private TextView tvHeading;
     private float magneticNorth;
-    private Location myLocation, destLocation ;
+    private Location destLocation ;
+    private TextView tvDistance;
 
 
     @Override
@@ -42,6 +43,7 @@ public class NavigationActivity extends ActionBarActivity implements SensorEvent
 
         image = (ImageView) findViewById(R.id.imageViewCompass);
         tvHeading = (TextView) findViewById(R.id.tvHeading);
+        tvDistance = (TextView) findViewById(R.id.tvDistance);
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
     }
@@ -92,8 +94,10 @@ public class NavigationActivity extends ActionBarActivity implements SensorEvent
 
     private float calculateDegree(){
         float heading = this.magneticNorth;
-//        float bearing = myLocation.bearingTo(destLocation);
-//        heading = (bearing - heading) * -1;
+        Location src = app.logicManager.getMyLocation() ;
+        Location dst = app.logicManager.getDstLocation() ;
+        float bearing = src.bearingTo(dst);
+        heading = (bearing - heading) * -1;
         return heading ;
     }
 
@@ -116,6 +120,11 @@ public class NavigationActivity extends ActionBarActivity implements SensorEvent
         // Start the animation
         image.startAnimation(ra);
         currentDegree = -degree;
+
+        Location src = app.logicManager.getMyLocation() ;
+        Location dst = app.logicManager.getDstLocation() ;
+        float dis = src.distanceTo(dst) * (float)0.000621371;
+        tvDistance.setText("Distance: " + Float.toString(dis) + " miles");
     }
 
     @Override

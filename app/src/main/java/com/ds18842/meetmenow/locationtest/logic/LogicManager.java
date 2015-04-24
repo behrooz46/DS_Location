@@ -23,11 +23,16 @@ public class LogicManager implements IMessageHandler, ILocationHandler {
 
 
     private MainActivity mainActivity;
+    private Location location, dstLocation;
 
     public LogicManager(Context context) {
         this.context = context ;
         me = new Node(null, null);
         nodes = new HashMap<String, Node>();
+        dstLocation = new Location("dummyprovider");
+
+        dstLocation.setLatitude(37.388492);
+        dstLocation.setLongitude(-122.058220);
     }
 
 
@@ -45,8 +50,11 @@ public class LogicManager implements IMessageHandler, ILocationHandler {
             GeoLocation pos = msg.getSrc().getGeoLocation();
             String instruction = (String) msg.getPayload() ;
 
-            if (mainActivity != null)
+            if (mainActivity != null) {
+                dstLocation.setLatitude(pos.getLat());
+                dstLocation.setLongitude(pos.getLng());
                 mainActivity.showRequest(name, instruction, pos);
+            }
         }else if (msg.getType() == Packet.RESPONSE ){
             String name = msg.getSrc().getName() ;
             GeoLocation pos = msg.getSrc().getGeoLocation();
@@ -60,12 +68,14 @@ public class LogicManager implements IMessageHandler, ILocationHandler {
 
     //Called by GeoLocation
     @Override
-    public void updateLocation(GeoLocation location) {
-        if ( location.getDistance(me.getGeoLocation()) < LOCATION_CHANGE_THERESHOLD )
+    public void updateLocation(Location location) {
+        this.location = location ;
+        GeoLocation geoLocaiton = new GeoLocation(location);
+        if ( geoLocaiton.getDistance(me.getGeoLocation()) < LOCATION_CHANGE_THERESHOLD )
             return ;
 
         //Update my location
-        me.setGeoLocation(location);
+        me.setGeoLocation(geoLocaiton);
         //Boradcast this update
         Node src = me ;
         Node dst = me ;
@@ -141,4 +151,11 @@ public class LogicManager implements IMessageHandler, ILocationHandler {
         return dst ;
     }
 
+    public Location getMyLocation() {
+        return location;
+    }
+
+    public Location getDstLocation() {
+        return dstLocation;
+    }
 }

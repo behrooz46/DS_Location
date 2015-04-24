@@ -48,7 +48,7 @@ public class GeoLocationManager extends Service implements LocationListener {
         if (isBetterLocation(newLocation, location)){
             location = newLocation ;
             if (handler != null) {
-                handler.updateLocation(new GeoLocation(location));
+                handler.updateLocation(location);
             }
         }
     }

@@ -23,8 +23,6 @@ import com.ds18842.meetmenow.locationtest.R;
 public class NavigationActivity extends ActionBarActivity implements SensorEventListener {
 
     public static final int INTENT_TYPE_LOCATION_CHANGE = 1;
-    private TextView txt_latValue, txt_lngValue, txt_timeValue;
-    private Button btn_updateLocation;
     private ImageView image;
     private MeetMeNow app;
 
@@ -38,22 +36,9 @@ public class NavigationActivity extends ActionBarActivity implements SensorEvent
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_navigation);
 
         app = (MeetMeNow) getApplicationContext();
-
-        txt_latValue = (TextView) findViewById(R.id.txt_latValue);
-        txt_lngValue = (TextView) findViewById(R.id.txt_lngValue);
-        txt_timeValue = (TextView) findViewById(R.id.txt_timeValue);
-        btn_updateLocation = (Button) findViewById(R.id.btn_sendRequest);
-        btn_updateLocation.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Location pos = app.getGeoLocationProvider().getLocation();
-                locationChange(pos.getLongitude(), pos.getLongitude(), pos.getTime());
-            }
-        });
-
 
         image = (ImageView) findViewById(R.id.imageViewCompass);
         tvHeading = (TextView) findViewById(R.id.tvHeading);
@@ -95,26 +80,6 @@ public class NavigationActivity extends ActionBarActivity implements SensorEvent
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        if( intent.getIntExtra("type", 0) == INTENT_TYPE_LOCATION_CHANGE ){
-            locationInent(intent);
-        }
-    }
-
-    private void locationInent(Intent intent) {
-        double lng = intent.getDoubleExtra("lng", 0);
-        double lat = intent.getDoubleExtra("lat", 0);
-        long time = intent.getLongExtra("updatedAt", 0);
-        locationChange(lng, lat, time);
-    }
-
-    private void locationChange(double lng, double lat, long time) {
-        txt_lngValue.setText(lng + "");
-        txt_latValue.setText(lat + "");
-        txt_timeValue.setText(time + "");
-    }
 
 
     private float normalizeDegree(float value) {
@@ -127,8 +92,8 @@ public class NavigationActivity extends ActionBarActivity implements SensorEvent
 
     private float calculateDegree(){
         float heading = this.magneticNorth;
-        float bearing = myLocation.bearingTo(destLocation);
-        heading = (bearing - heading) * -1;
+//        float bearing = myLocation.bearingTo(destLocation);
+//        heading = (bearing - heading) * -1;
         return heading ;
     }
 
@@ -156,6 +121,7 @@ public class NavigationActivity extends ActionBarActivity implements SensorEvent
     @Override
     public void onSensorChanged(SensorEvent event) {
         this.magneticNorth = Math.round(event.values[0]);
+        updateDirection();
     }
 
     @Override

@@ -50,20 +50,7 @@ public class GeoLocationManager extends Service implements LocationListener {
             if (handler != null) {
                 handler.updateLocation(new GeoLocation(location));
             }
-            sendLocationToUI(location);
         }
-    }
-
-    private void sendLocationToUI(Location location) {
-//        Intent i=new Intent(context, MainActivity.class);
-//        i.putExtra("type", MainActivity.INTENT_TYPE_LOCATION_CHANGE);
-//
-//        i.putExtra("lng", location.getLongitude());
-//        i.putExtra("lat", location.getLatitude());
-//        i.putExtra("time", location.getTime());
-//        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//        Log.v("log", location.toString());
-//        context.startActivity(i);
     }
 
     public boolean isValidLocation(){

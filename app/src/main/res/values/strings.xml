@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">WiFi Direct + Location Test</string>
+    <string name="app_name">Meet Me Now!</string>
     <string name="enable_p2p_button">P2P On/Off</string>
     <string name="discover_peers_button">Discover</string>
     <string name="connect_peer_button">Connect</string>

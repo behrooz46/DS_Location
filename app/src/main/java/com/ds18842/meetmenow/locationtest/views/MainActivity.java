@@ -1,11 +1,16 @@
 package com.ds18842.meetmenow.locationtest.views;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -14,63 +19,93 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.ds18842.meetmenow.locationtest.R;
 import com.ds18842.meetmenow.locationtest.MeetMeNow;
+import com.ds18842.meetmenow.locationtest.common.GeoLocation;
+import com.ds18842.meetmenow.locationtest.common.Packet;
 
-public class MainActivity extends ActionBarActivity implements SensorEventListener {
+import org.w3c.dom.Text;
 
-    public static final int INTENT_TYPE_LOCATION_CHANGE = 1;
-    private TextView txt_latValue, txt_lngValue, txt_timeValue;
-    private Button btn_updateLocation;
-    private ImageView image;
+public class MainActivity extends ActionBarActivity{
+
+    private EditText edit_main_to, edit_main_msg;
+    private TextView txt_result;
+    private Button btn_sendRequest;
     private MeetMeNow app;
-
-    private float currentDegree = 0f;
-    private SensorManager mSensorManager;
-    private TextView tvHeading;
-    private float magneticNorth;
-    private Location myLocation, destLocation ;
-
+    private Handler mHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
         app = (MeetMeNow) getApplicationContext();
 
-        txt_latValue = (TextView) findViewById(R.id.txt_latValue);
-        txt_lngValue = (TextView) findViewById(R.id.txt_lngValue);
-        txt_timeValue = (TextView) findViewById(R.id.txt_timeValue);
-        btn_updateLocation = (Button) findViewById(R.id.btn_sendRequest);
-        btn_updateLocation.setOnClickListener(new View.OnClickListener() {
+        txt_result = (TextView) findViewById(R.id.txt_result);
+        edit_main_to = (EditText) findViewById(R.id.edit_main_to);
+        edit_main_msg = (EditText) findViewById(R.id.edit_main_msg);
+        btn_sendRequest = (Button) findViewById(R.id.btn_sendRequest);
+
+        btn_sendRequest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Location pos = app.getGeoLocationProvider().getLocation();
-                locationChange(pos.getLongitude(), pos.getLongitude(), pos.getTime());
+                String dst = edit_main_to.getText().toString();
+                String msg = edit_main_msg.getText().toString();
+                boolean result = app.logicManager.sendMessageTo(dst, msg);
+                txt_result.setVisibility(View.VISIBLE);
+                if (result) {
+                    txt_result.setText("Message sent to " + dst + ".");
+                } else {
+                    txt_result.setText("No user found with name " + dst + " in your network.");
+                }
             }
         });
 
+        showRequest("Test", null, null);
 
-        image = (ImageView) findViewById(R.id.imageViewCompass);
-        tvHeading = (TextView) findViewById(R.id.tvHeading);
-        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+    }
 
+
+    public void showResponse(String name, Boolean response, GeoLocation pos) {
+    }
+
+    public void showRequest(final String name, String instruction, GeoLocation pos){
+        new AlertDialog.Builder(MainActivity.this)
+                .setTitle("Meet Me Now Request!")
+                .setMessage("Do you want to meet with " + name + " ?")
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        app.logicManager.sendResponseTo(name, true);
+                        Intent i = new Intent(app, NavigationActivity.class);
+                        startActivity(i);
+                    }
+                })
+                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        app.logicManager.sendResponseTo(name, false);
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_email)
+                .show();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mSensorManager.unregisterListener(this);
+        app.logicManager.setMainActivity(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION), SensorManager.SENSOR_DELAY_GAME);
+        app.logicManager.setMainActivity(this);
+
+        txt_result.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -93,74 +128,6 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        if( intent.getIntExtra("type", 0) == INTENT_TYPE_LOCATION_CHANGE ){
-            locationInent(intent);
-        }
-    }
-
-    private void locationInent(Intent intent) {
-        double lng = intent.getDoubleExtra("lng", 0);
-        double lat = intent.getDoubleExtra("lat", 0);
-        long time = intent.getLongExtra("updatedAt", 0);
-        locationChange(lng, lat, time);
-    }
-
-    private void locationChange(double lng, double lat, long time) {
-        txt_lngValue.setText(lng + "");
-        txt_latValue.setText(lat + "");
-        txt_timeValue.setText(time + "");
-    }
-
-
-    private float normalizeDegree(float value) {
-        if (value >= 0.0f && value <= 180.0f) {
-            return value;
-        } else {
-            return 180 + (180 + value);
-        }
-    }
-
-    private float calculateDegree(){
-        float heading = this.magneticNorth;
-        float bearing = myLocation.bearingTo(destLocation);
-        heading = (bearing - heading) * -1;
-        return heading ;
-    }
-
-    public synchronized void updateDirection(){
-        // get the angle around the z-axis rotated
-        float degree = calculateDegree();
-        tvHeading.setText("Heading: " + Float.toString(degree) + " degrees");
-        // create a rotation animation (reverse turn degree degrees)
-        RotateAnimation ra = new RotateAnimation(
-                currentDegree,
-                -degree,
-                Animation.RELATIVE_TO_SELF, 0.5f,
-                Animation.RELATIVE_TO_SELF,
-                0.5f);
-        // how long the animation will take place
-        ra.setDuration(210);
-        // set the animation after the end of the reservation status
-        ra.setFillAfter(true);
-
-        // Start the animation
-        image.startAnimation(ra);
-        currentDegree = -degree;
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        this.magneticNorth = Math.round(event.values[0]);
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // not in use
     }
 
 }

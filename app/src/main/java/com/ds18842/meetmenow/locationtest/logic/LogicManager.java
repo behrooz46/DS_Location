@@ -1,62 +1,66 @@
 package com.ds18842.meetmenow.locationtest.logic;
 
 import android.content.Context;
+import android.location.Location;
+import android.os.Message;
 
 import com.ds18842.meetmenow.locationtest.common.* ;
 import com.ds18842.meetmenow.locationtest.network.infrastructure.* ;
+import com.ds18842.meetmenow.locationtest.views.MainActivity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class LogicManager implements IMessageHandler, ILocationHandler {
     private static final double LOCATION_CHANGE_THERESHOLD = 10;
 
     private final Context context;
+    private final Map<String, Node> nodes;
     private IMessageHandler sender;
     private Node me;
 
-    public boolean isLoogedIn(){
-        return getSelfNode().getName() != null ;
-    }
+
+    private MainActivity mainActivity;
 
     public LogicManager(Context context) {
         this.context = context ;
         me = new Node(null, null);
+        nodes = new HashMap<String, Node>();
     }
 
-    public Node getSelfNode() {
-        return me;
-    }
-
-    public ArrayList <Node> getNodes(){
-        //TODO return list of all nodes
-        return null ;
-    }
 
     @Override
     public void receive(Packet msg) {
-        //TODO pass that to UI
-    }
+        if (msg.getType() == Packet.NETWORK ){
+            Map<String, Node> top = (HashMap<String, Node>)(msg.getPayload());
+            for(String key : top.keySet()){
+                synchronized (nodes){
+                    nodes.put(key, top.get(key));
+                }
+            }
+        }else if (msg.getType() == Packet.LOCATION ){
+            String name = msg.getSrc().getName() ;
+            GeoLocation pos = msg.getSrc().getGeoLocation();
+            String instruction = (String) msg.getPayload() ;
 
-    @Override
-    public void send(Packet msg) {
-        sender.send(msg);
-    }
+            if (mainActivity != null)
+                mainActivity.showRequest(name, instruction, pos);
+        }else if (msg.getType() == Packet.RESPONSE ){
+            String name = msg.getSrc().getName() ;
+            GeoLocation pos = msg.getSrc().getGeoLocation();
+            Boolean response = (Boolean) msg.getPayload() ;
 
-    @Override
-    public void broadcast(Packet msg) {
-        //TODO call routing.broadcast
-        sender.broadcast(msg);
-    }
-
-    public void setSender(IMessageHandler sender) {
-        this.sender = sender;
+            if (mainActivity != null)
+                mainActivity.showResponse(name, response, pos);
+        }
     }
 
 
     //Called by GeoLocation
     @Override
     public void updateLocation(GeoLocation location) {
-        //TODO decide if it should tell UI
         if ( location.getDistance(me.getGeoLocation()) < LOCATION_CHANGE_THERESHOLD )
             return ;
 
@@ -70,13 +74,7 @@ public class LogicManager implements IMessageHandler, ILocationHandler {
 
     //Called by UI
     public boolean sendMessageTo(String name, String content){
-        Node src = me, dst = null ;
-        for(Node node : getNodes()){
-            if (node.getName().equals(name)){
-                dst = node ;
-                break;
-            }
-        }
+        Node src = me, dst = getNodeFromName(name);
         if (dst == null){
             return false ;
         }else{
@@ -86,7 +84,61 @@ public class LogicManager implements IMessageHandler, ILocationHandler {
     }
 
     //Called by UI
+    public void sendResponseTo(String name, Boolean response){
+        Node src = me, dst = getNodeFromName(name);
+        if (dst != null){
+            send(new Packet(src, dst, Packet.RESPONSE, new Boolean(true))) ;
+        }
+    }
+
+    //Called by UI
     public void joinTheNetwork(String name) {
         me.setName(name);
     }
+
+
+
+
+
+
+    @Override
+    public void send(Packet msg) { sender.send(msg); }
+
+    @Override
+    public void broadcast(Packet msg) {
+        sender.broadcast(msg);
+    }
+
+    public void setSender(IMessageHandler sender) {
+        this.sender = sender;
+    }
+
+    public void setMainActivity(MainActivity mainActivity) {
+        this.mainActivity = mainActivity;
+    }
+
+    public Node getSelfNode() {
+        return me;
+    }
+
+    public Set<String> getNodeNames(){
+        return nodes.keySet() ;
+    }
+
+    public boolean isLoogedIn(){
+        return getSelfNode().getName() != null ;
+    }
+
+
+    private Node getNodeFromName(String name){
+        Node dst = null ;
+        for(String key : getNodeNames()){
+            if (key.equals(name)) {
+                dst = nodes.get(key) ;
+                break;
+            }
+        }
+        return dst ;
+    }
+
 }

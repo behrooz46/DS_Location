@@ -31,7 +31,7 @@ public class RoutingManager implements IMessageHandler {
 
     @Override
     public void receive(Packet msg){
-        if (isDestination(msg.getDst())){
+        if (amIequalTo(msg.getDst())){
             receiver.receive(msg);
         }else{
             this.send(msg);
@@ -50,7 +50,7 @@ public class RoutingManager implements IMessageHandler {
         sender.broadcast(msg);
     }
 
-    private boolean isDestination(Node dst){
+    private boolean amIequalTo(Node dst){
         return me.getName().equals(dst.getName());
     }
 
@@ -67,7 +67,7 @@ public class RoutingManager implements IMessageHandler {
             }
         }
 
-        if (isDestination(best)) {
+        if (amIequalTo(best)) {
             //TODO there's no node to send it to.
             return null;
         }

@@ -24,7 +24,7 @@ import com.ds18842.meetmenow.locationtest.R;
 public class LoginActivity extends ActionBarActivity {
 
     public static final int INTENT_TYPE_LOCATION_CHANGE = 1;
-    private EditText txt_login_name, txt_login_email;
+    private EditText txt_login_name;
     private Button btn_login_join;
     private MeetMeNow app;
 
@@ -34,7 +34,6 @@ public class LoginActivity extends ActionBarActivity {
         setContentView(R.layout.activity_login);
         app = (MeetMeNow) getApplicationContext();
         txt_login_name = (EditText) findViewById(R.id.txt_login_name);
-        txt_login_email = (EditText) findViewById(R.id.txt_login_email);
         btn_login_join = (Button) findViewById(R.id.btn_login_join);
 
         btn_login_join.setOnClickListener(new View.OnClickListener() {

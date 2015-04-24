@@ -46,6 +46,8 @@ public class NavigationActivity extends ActionBarActivity implements SensorEvent
         tvDistance = (TextView) findViewById(R.id.tvDistance);
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
+
+        //TODO update name & instruction
     }
 
     @Override

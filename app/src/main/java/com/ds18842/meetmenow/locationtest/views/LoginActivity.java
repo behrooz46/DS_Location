@@ -53,7 +53,7 @@ public class LoginActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        loginCheck() ;
+//        loginCheck() ;
     }
 
     private void loginCheck() {

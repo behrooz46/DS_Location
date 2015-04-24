@@ -31,8 +31,8 @@ public class LogicManager implements IMessageHandler, ILocationHandler {
         nodes = new HashMap<String, Node>();
         dstLocation = new Location("dummyprovider");
 
-        dstLocation.setLatitude(37.388492);
-        dstLocation.setLongitude(-122.058220);
+        dstLocation.setLatitude(37.397941);
+        dstLocation.setLongitude(-122.035475);
     }
 
 
@@ -97,13 +97,14 @@ public class LogicManager implements IMessageHandler, ILocationHandler {
     public void sendResponseTo(String name, Boolean response){
         Node src = me, dst = getNodeFromName(name);
         if (dst != null){
-            send(new Packet(src, dst, Packet.RESPONSE, new Boolean(true))) ;
+            send(new Packet(src, dst, Packet.RESPONSE, new Boolean(response))) ;
         }
     }
 
     //Called by UI
     public void joinTheNetwork(String name) {
-        me.setName(name);
+        if (me.getName() == null)
+            me.setName(name);
     }
 
 

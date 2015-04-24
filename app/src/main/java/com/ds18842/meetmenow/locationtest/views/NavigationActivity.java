@@ -92,19 +92,24 @@ public class NavigationActivity extends ActionBarActivity implements SensorEvent
         }
     }
 
-    private float calculateDegree(){
+    public static String headingToString2(float d)
+    {
+        String directions[] = {"South", "South West", "West", "North West", "North", "North East", "East", "South East", "South"};
+        return directions[ (int)Math.round((  ((double)(d + 180) % 360) / 45)) ];
+    }
+
+
+    public synchronized void updateDirection(){
+        // get the angle around the z-axis rotated
         float heading = this.magneticNorth;
         Location src = app.logicManager.getMyLocation() ;
         Location dst = app.logicManager.getDstLocation() ;
         float bearing = src.bearingTo(dst);
         heading = (bearing - heading) * -1;
-        return heading ;
-    }
+        float degree = heading ;
 
-    public synchronized void updateDirection(){
-        // get the angle around the z-axis rotated
-        float degree = calculateDegree();
-        tvHeading.setText("Heading: " + Float.toString(degree) + " degrees");
+
+        tvHeading.setText("Heading: Go " + headingToString2(bearing));
         // create a rotation animation (reverse turn degree degrees)
         RotateAnimation ra = new RotateAnimation(
                 currentDegree,
@@ -121,10 +126,8 @@ public class NavigationActivity extends ActionBarActivity implements SensorEvent
         image.startAnimation(ra);
         currentDegree = -degree;
 
-        Location src = app.logicManager.getMyLocation() ;
-        Location dst = app.logicManager.getDstLocation() ;
         float dis = src.distanceTo(dst) * (float)0.000621371;
-        tvDistance.setText("Distance: " + Float.toString(dis) + " miles");
+        tvDistance.setText("Distance: " + String.format("%.2f", dis) + " miles");
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.ds18842.meetmenow.locationtest.views;
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -23,7 +24,9 @@ import com.ds18842.meetmenow.locationtest.R;
 
 public class LoginActivity extends ActionBarActivity {
 
-    public static final int INTENT_TYPE_LOCATION_CHANGE = 1;
+    private final static int REQUEST_ENABLE_BT = 1;
+
+
     private EditText txt_login_name;
     private Button btn_login_join;
     private MeetMeNow app;
@@ -43,6 +46,27 @@ public class LoginActivity extends ActionBarActivity {
                 loginCheck();
             }
         });
+
+
+
+        app.mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (app.mBluetoothAdapter == null) {
+            // Device does not support Bluetooth
+        }
+
+        if (!app.mBluetoothAdapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        }
+
+        Intent discoverableIntent = new
+                Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 0);
+        startActivity(discoverableIntent);
+
+
+
+        app.peerManager.startDiscovery(app.mBluetoothAdapter);
     }
 
     @Override

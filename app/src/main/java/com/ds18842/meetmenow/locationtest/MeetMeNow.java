@@ -1,6 +1,8 @@
 package com.ds18842.meetmenow.locationtest;
 
 import android.app.Application;
+import android.bluetooth.BluetoothAdapter;
+import android.content.Intent;
 
 import com.ds18842.meetmenow.locationtest.logic.GeoLocationManager;
 import com.ds18842.meetmenow.locationtest.logic.LogicManager;
@@ -13,7 +15,8 @@ public class MeetMeNow extends Application{
     public LogicManager logicManager;
     private NetworkManager networkManager;
     private RoutingManager routingManager;
-    private PeerManager peerManager;
+    public PeerManager peerManager;
+    public BluetoothAdapter mBluetoothAdapter;
 
     public MeetMeNow(){
 
@@ -31,7 +34,7 @@ public class MeetMeNow extends Application{
 
         logicManager = new LogicManager(this);
         geoLocationManager = new GeoLocationManager(this);
-        peerManager = new PeerManager();
+        peerManager = new PeerManager(this);
         networkManager = new NetworkManager(this, logicManager, peerManager);
         routingManager = new RoutingManager(this, logicManager, peerManager);
 

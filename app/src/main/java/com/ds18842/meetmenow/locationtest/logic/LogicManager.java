@@ -3,6 +3,7 @@ package com.ds18842.meetmenow.locationtest.logic;
 import android.content.Context;
 import android.location.Location;
 import android.os.Message;
+import android.util.Log;
 
 import com.ds18842.meetmenow.locationtest.common.* ;
 import com.ds18842.meetmenow.locationtest.network.infrastructure.* ;
@@ -17,10 +18,11 @@ public class LogicManager implements IMessageHandler, ILocationHandler {
     private static final double LOCATION_CHANGE_THERESHOLD = 10;
 
     private final Context context;
-    private final Map<String, Node> nodes;
+    private final HashMap<String, Node> nodes;
     private IMessageHandler sender;
     private Node me;
 
+    public static String TAG = "LogicManager";
 
     private MainActivity mainActivity;
     private Location location, dstLocation;
@@ -29,12 +31,16 @@ public class LogicManager implements IMessageHandler, ILocationHandler {
         this.context = context ;
         me = new Node(null, null, null);
         nodes = new HashMap<String, Node>();
+
         dstLocation = new Location("dummyprovider");
 
         dstLocation.setLatitude(37.397941);
         dstLocation.setLongitude(-122.035475);
     }
 
+    public HashMap<String, Node> getNodes() {
+        return nodes;
+    }
 
     @Override
     public void receive(Packet msg) {
@@ -105,6 +111,9 @@ public class LogicManager implements IMessageHandler, ILocationHandler {
     public void joinTheNetwork(String name) {
         if (me.getName() == null)
             me.setName(name);
+
+        // TODO Add itself to nodes, may be changed later
+        nodes.put(me.getName(), me);
     }
 
 
@@ -113,7 +122,10 @@ public class LogicManager implements IMessageHandler, ILocationHandler {
 
 
     @Override
-    public void send(Packet msg) { sender.send(msg); }
+    public void send(Packet msg) {
+        Log.d(TAG, "Before send");
+        sender.send(msg);
+    }
 
     @Override
     public void broadcast(Packet msg) {

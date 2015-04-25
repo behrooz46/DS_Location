@@ -3,7 +3,9 @@ package com.ds18842.meetmenow.locationtest.common;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class Packet{
+import java.io.Serializable;
+
+public class Packet implements Serializable {
     //implements Parcelable {
     public static final int MAX_TTL = 20, BROADCAST = 1, LOCATION = 2, NETWORK = 3, RESPONSE = 4, EXCHANGE = 5, ACK = 6;
     private static int MSG_NUM = 0 ;

@@ -2,6 +2,7 @@ package com.ds18842.meetmenow.locationtest.network;
 
 
 import android.content.Context;
+import android.util.Log;
 
 import com.ds18842.meetmenow.locationtest.common.IMessageHandler;
 import com.ds18842.meetmenow.locationtest.common.Packet;
@@ -12,6 +13,8 @@ import com.ds18842.meetmenow.locationtest.network.infrastructure.ISocket;
 import com.ds18842.meetmenow.locationtest.network.infrastructure.Neighbour;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class NetworkManager implements IMessageHandler {
     private final Context context;
@@ -19,6 +22,8 @@ public class NetworkManager implements IMessageHandler {
     private LogicManager app;
     private Node me;
     private IMessageHandler receiver;
+
+    public static final String TAG = "NetworkManager";
 
     public NetworkManager(Context context, LogicManager app, PeerManager peerManager){
         this.context = context ;
@@ -45,14 +50,25 @@ public class NetworkManager implements IMessageHandler {
     public void send(Packet msg) {
         //TODO reduce TTL by 1
 
+        Log.d(TAG, "Enter send");
+
         Node node = msg.getNext() ;
-        Neighbour next = peerManager.getNeighbor(node);
+        final Neighbour next = peerManager.getNeighbor(node);
         //IDevice device = next.getDevice() ;
         //ISocket socket = next.getSocket();
         //TODO send msg over socket to device
 
+        peerManager.setPacketNow(msg);
         peerManager.setState(PeerManager.SENDING);
-        peerManager.commWithPeer(next.getNode());
+
+        Thread t = new Thread() {
+            public void run() {
+                Log.d(TAG, "send: Before commWithPeer");
+                peerManager.commWithPeer(next.getNode());
+                Log.d(TAG, "send: After commWithPeer");
+            }
+        };
+        t.start();
     }
 
     @Override
@@ -66,5 +82,9 @@ public class NetworkManager implements IMessageHandler {
             msg.setHop(me, neighbor.getNode());
             send(msg);
         }
+    }
+
+    public HashMap<String, Node> getNodes() {
+        return app.getNodes();
     }
 }

@@ -71,10 +71,11 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
             if (state == WifiP2pManager.WIFI_P2P_STATE_ENABLED) {
                 // Wifi Direct mode is enabled
                 //activity.setIsWifiP2pEnabled(true);
+                Log.d(TAG, "WifiP2p turned on");
             } else {
                 //activity.setIsWifiP2pEnabled(false);
                 //activity.resetData();
-
+                Log.d(TAG, "WifiP2p turned off");
             }
             Log.d(TAG, "P2P state changed - " + state);
         } else if (WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {

@@ -1,6 +1,7 @@
 package com.ds18842.meetmenow.locationtest.routing;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.ds18842.meetmenow.locationtest.network.PeerManager;
 import com.ds18842.meetmenow.locationtest.network.infrastructure.* ;
@@ -15,6 +16,8 @@ public class RoutingManager implements IMessageHandler {
     private LogicManager app;
     private IMessageHandler receiver;
     private IMessageHandler sender;
+
+    public static final String TAG = "RoutingManager";
 
 
     private Node me ;
@@ -42,6 +45,7 @@ public class RoutingManager implements IMessageHandler {
     public void send(Packet msg){
         Node next = findNextNode(msg);
         msg.setHop(me, next);
+        Log.d(TAG, "Before send");
         sender.send(msg);
     }
 
@@ -56,7 +60,8 @@ public class RoutingManager implements IMessageHandler {
 
     private Node findNextNode(Packet msg) {
         ArrayList<Neighbour> neighbors = peerManager.getNeighbors() ;
-        Node best = me ; double min_dis = me.getGeoLocation().getDistance(msg.getDst().getGeoLocation()) ;
+        Node best = me ;
+        /*double min_dis = me.getGeoLocation().getDistance(msg.getDst().getGeoLocation()) ;
 
         for (Neighbour neighbor : neighbors) {
             double dis = neighbor.getNode().getGeoLocation().getDistance(msg.getDst().getGeoLocation()) ; ;
@@ -65,7 +70,8 @@ public class RoutingManager implements IMessageHandler {
                 min_dis = dis ;
                 best = neighbor.getNode() ;
             }
-        }
+        }*/
+        best = neighbors.get(0).getNode();
 
         if (amIequalTo(best)) {
             //TODO there's no node to send it to.

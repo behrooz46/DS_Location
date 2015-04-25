@@ -33,6 +33,8 @@ public class MainActivity extends ActionBarActivity{
 
         app = (MeetMeNow) getApplicationContext();
 
+        app.peerManager.discoverPeers();
+
         txt_result = (TextView) findViewById(R.id.txt_result);
         edit_main_to = (EditText) findViewById(R.id.edit_main_to);
         edit_main_msg = (EditText) findViewById(R.id.edit_main_msg);
@@ -53,7 +55,7 @@ public class MainActivity extends ActionBarActivity{
             }
         });
 
-        showRequest("Test", null, null);
+        //showRequest("Test", null, null);
 
     }
 

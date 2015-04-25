@@ -13,7 +13,9 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Semaphore;
 
 import android.content.Context;
@@ -27,7 +29,7 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.util.Log;
 
-public class PeerManager /*extends BroadcastReceiver*/ implements PeerListListener, WifiP2pManager.ConnectionInfoListener {
+public class PeerManager implements PeerListListener, WifiP2pManager.ConnectionInfoListener {
     //TODO Discovery
     //TODO establish connection : exchange location
     //TODO after exchanging location, add that to list of neighbors and update logic about the new node
@@ -36,9 +38,6 @@ public class PeerManager /*extends BroadcastReceiver*/ implements PeerListListen
     private final Context context;
 
     private List<WifiP2pDevice> peers;
-    //private HashMap<String, Node> ipToNodes;
-
-    //private ArrayList<Neighbour> neighbours;
 
     private ArrayList<Neighbour> neighbours;
 
@@ -47,7 +46,7 @@ public class PeerManager /*extends BroadcastReceiver*/ implements PeerListListen
     private WifiP2pManager.Channel channel;
     private WifiP2pInfo info;
     private WiFiDirectBroadcastReceiver broadcastReceiver;
-    private IMessageHandler receiver;
+    private NetworkManager receiver;
 
     private Packet packetNow;
 
@@ -66,10 +65,10 @@ public class PeerManager /*extends BroadcastReceiver*/ implements PeerListListen
 
     public static final int NEW = 0, EXCHANGE = 1, NORMAL = 2, SENDING = 3;
     private int state = NEW;
-    //private boolean
+    private boolean hasInitDiscovery = false;
 
 
-    private boolean success = false;
+    //private boolean success = false;
 
     //public static boolean peerSuccess = false;
 
@@ -142,7 +141,7 @@ public class PeerManager /*extends BroadcastReceiver*/ implements PeerListListen
         this.state = state;
     }
 
-    public void setReceiver(IMessageHandler receiver) {
+    public void setReceiver(NetworkManager receiver) {
         this.receiver = receiver;
     }
 
@@ -157,6 +156,8 @@ public class PeerManager /*extends BroadcastReceiver*/ implements PeerListListen
     @Override
     public void onPeersAvailable(WifiP2pDeviceList peerList) {
         if (state == EXCHANGE) return;
+
+        if (!hasInitDiscovery) return;
 
         Log.d(TAG, "Enter onPeersAvailable");
         peers.clear();
@@ -255,15 +256,24 @@ public class PeerManager /*extends BroadcastReceiver*/ implements PeerListListen
                     OutputStream out = clientSocket.getOutputStream();
                     ObjectOutputStream outputStream = new ObjectOutputStream(out);
                     Node src = new Node(device.deviceName, null, device.deviceAddress);
-                    Packet outPacket = new Packet(src, null, Packet.EXCHANGE, "New Location");
+                    Packet outPacket = new Packet(src, null, Packet.EXCHANGE, receiver.getNodes());
 
                     outputStream.writeObject(outPacket);
 
-                    Log.d(TAG, "Sending Location");
+                    Log.d(TAG, "Sending: " + outPacket.getPayload());
 
                     Packet rePacket = (Packet) inputStream.readObject();
 
                     neighbours.add(new Neighbour(rePacket.getSrc()));
+
+                    // TODO Add nodes here, maybe changed later
+                    HashMap<String, Node> nodes = receiver.getNodes();
+                    HashMap<String, Node> top = (HashMap<String, Node>)(rePacket.getPayload());
+                    for(String key : top.keySet()){
+                        synchronized (nodes){
+                            nodes.put(key, top.get(key));
+                        }
+                    }
 
                     Log.d(TAG, "Receive: " + rePacket.getPayload());
 
@@ -281,9 +291,11 @@ public class PeerManager /*extends BroadcastReceiver*/ implements PeerListListen
                     Log.d(TAG, node.getNode().getName() + " " + node.getNode().getAddress());
                 }
 
-                Log.d(TAG, "Before release connSem");
-
+                Log.d(TAG, "operation: before release: " + connSem.availablePermits());
                 connSem.release();
+                Log.d(TAG, "operation: after release: " + connSem.availablePermits());
+
+                Log.d(TAG, "Server exit");
             }
         };
         server.start();
@@ -316,11 +328,11 @@ public class PeerManager /*extends BroadcastReceiver*/ implements PeerListListen
                     ObjectOutputStream outStream = new ObjectOutputStream(out);
 
                     Node src = new Node(device.deviceName, null, device.deviceAddress);
-                    Packet outPacket = new Packet(src, null, Packet.EXCHANGE, "New Location");
+                    Packet outPacket = new Packet(src, null, Packet.EXCHANGE, receiver.getNodes());
 
                     outStream.writeObject(outPacket);
 
-                    Log.d(TAG, "Sending Location");
+                    Log.d(TAG, "Sending: " + outPacket.getPayload());
 
                     InputStream in = socket.getInputStream();
                     ObjectInputStream inStream = new ObjectInputStream(in);
@@ -328,9 +340,15 @@ public class PeerManager /*extends BroadcastReceiver*/ implements PeerListListen
                     Packet inPacket = (Packet) inStream.readObject();
                     neighbours.add(new Neighbour(inPacket.getSrc()));
 
+                    // TODO Add nodes here, maybe changed later
+                    HashMap<String, Node> nodes = receiver.getNodes();
+                    HashMap<String, Node> top = (HashMap<String, Node>)(inPacket.getPayload());
+                    for(String key : top.keySet()){
+                        synchronized (nodes){
+                            nodes.put(key, top.get(key));
+                        }
+                    }
 
-                    //Toast.makeText(context, inPacket.getPayload(),
-                    //        Toast.LENGTH_SHORT).show();
                     Log.d(TAG, "Receive: " + inPacket.getPayload());
 
                     in.close();
@@ -344,14 +362,16 @@ public class PeerManager /*extends BroadcastReceiver*/ implements PeerListListen
                         Log.d(TAG, node.getNode().getName() + " " + node.getNode().getAddress());
                     }
 
-                    Log.d(TAG, "Before release connSem");
-
-                    connSem.release();
                 }
                 catch(Exception e) {
                     e.printStackTrace();
                 }
 
+                Log.d(TAG, "operation: before release: " + connSem.availablePermits());
+                connSem.release();
+                Log.d(TAG, "operation: after release: " + connSem.availablePermits());
+
+                Log.d(TAG, "Client exit");
 
             }
         };
@@ -386,7 +406,16 @@ public class PeerManager /*extends BroadcastReceiver*/ implements PeerListListen
                     Node src = new Node(device.deviceName, null, device.deviceAddress);
 
                     if (inPacket.getType() == Packet.EXCHANGE) {
-                        outPacket = new Packet(src, null, Packet.EXCHANGE, "Old Location");
+                        // TODO Add nodes here, maybe changed later
+                        HashMap<String, Node> nodes = receiver.getNodes();
+                        HashMap<String, Node> top = (HashMap<String, Node>)(inPacket.getPayload());
+                        for(String key : top.keySet()){
+                            synchronized (nodes){
+                                nodes.put(key, top.get(key));
+                            }
+                        }
+
+                        outPacket = new Packet(src, null, Packet.EXCHANGE, receiver.getNodes());
                     }
                     else {
                         receiver.receive(inPacket);
@@ -410,6 +439,10 @@ public class PeerManager /*extends BroadcastReceiver*/ implements PeerListListen
                 for (Neighbour node : neighbours) {
                     Log.d(TAG, node.getNode().getName() + " " + node.getNode().getAddress());
                 }
+
+                /*Log.d(TAG, "operation: before release: " + connSem.availablePermits());
+                connSem.release();
+                Log.d(TAG, "operation: after release: " + connSem.availablePermits());*/
 
                 Log.d(TAG, "Server exit");
             }
@@ -464,7 +497,16 @@ public class PeerManager /*extends BroadcastReceiver*/ implements PeerListListen
 
                     Packet outPacket;
                     if (inPacket.getType() == Packet.EXCHANGE) {
-                        outPacket = new Packet(src, null, Packet.EXCHANGE, "Old Location");
+                        // TODO Add nodes here, maybe changed later
+                        HashMap<String, Node> nodes = receiver.getNodes();
+                        HashMap<String, Node> top = (HashMap<String, Node>)(inPacket.getPayload());
+                        for(String key : top.keySet()){
+                            synchronized (nodes){
+                                nodes.put(key, top.get(key));
+                            }
+                        }
+
+                        outPacket = new Packet(src, null, Packet.EXCHANGE, receiver.getNodes());
                     }
                     else {
                         receiver.receive(inPacket);
@@ -488,6 +530,10 @@ public class PeerManager /*extends BroadcastReceiver*/ implements PeerListListen
                 catch(Exception e) {
                     e.printStackTrace();
                 }
+
+                /*Log.d(TAG, "operation: before release: " + connSem.availablePermits());
+                connSem.release();
+                Log.d(TAG, "operation: after release: " + connSem.availablePermits());*/
 
                 Log.d(TAG, "Client exit");
 
@@ -538,6 +584,10 @@ public class PeerManager /*extends BroadcastReceiver*/ implements PeerListListen
                 }
 
                 state = NORMAL;
+
+                Log.d(TAG, "operation: before release: " + connSem.availablePermits());
+                connSem.release();
+                Log.d(TAG, "operation: after release: " + connSem.availablePermits());
 
                 Log.d(TAG, "Change state to NORMAL. Server exit");
             }
@@ -596,6 +646,10 @@ public class PeerManager /*extends BroadcastReceiver*/ implements PeerListListen
 
                 state = NORMAL;
 
+                Log.d(TAG, "operation: before release: " + connSem.availablePermits());
+                connSem.release();
+                Log.d(TAG, "operation: after release: " + connSem.availablePermits());
+
                 Log.d(TAG, "Change state to NORMAL. Client exit");
 
             }
@@ -607,6 +661,8 @@ public class PeerManager /*extends BroadcastReceiver*/ implements PeerListListen
     public void discoverPeers() {
 
         final PeerManager peerManager = this;
+        hasInitDiscovery = true;
+
         manager.discoverPeers(channel, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
@@ -657,9 +713,10 @@ public class PeerManager /*extends BroadcastReceiver*/ implements PeerListListen
     public void commWithPeer(Node node) {
         final WifiP2pConfig config = new WifiP2pConfig();
         config.deviceAddress = node.getAddress();
+
         config.wps.setup = WpsInfo.PBC;
 
-        Log.d(TAG, "Connecting to :" + node.getName());
+        Log.d(TAG, "Connecting to :" + node.getName() + " " + node.getAddress());
 
         Thread thread = new Thread(){
             public void run(){
@@ -682,7 +739,11 @@ public class PeerManager /*extends BroadcastReceiver*/ implements PeerListListen
 
         //connLock.lock();
         try {
+            Log.d(TAG, "commWithPeer: before acquire: " + connSem.availablePermits());
             connSem.acquire();
+            Log.d(TAG, "commWithPeer: after acquire: " + connSem.availablePermits());
+
+
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -706,13 +767,16 @@ public class PeerManager /*extends BroadcastReceiver*/ implements PeerListListen
         Log.d(TAG, "Enter connect");
 
         try {
+            Log.d(TAG, "connect: before acquire: " + connSem.availablePermits());
             connSem.acquire();
+            Log.d(TAG, "connect: after acquire: " + connSem.availablePermits());
+
         }
         catch(Exception e) {
             e.printStackTrace();
         }
 
-        Log.d(TAG, "After acquire connSem in connect");
+        //Log.d(TAG, "After acquire connSem in connect");
 
         manager.connect(channel, config, new WifiP2pManager.ActionListener() {
 
@@ -754,7 +818,10 @@ public class PeerManager /*extends BroadcastReceiver*/ implements PeerListListen
             public void onSuccess() {
                 Log.d(TAG, "Disconnect succeeded");
 
+                Log.d(TAG, "disconnect: before release: " + connSem.availablePermits());
                 connSem.release();
+                Log.d(TAG, "disconnect: after release: " + connSem.availablePermits());
+
             }
         });
         Log.d(TAG, "Leave disconnect");

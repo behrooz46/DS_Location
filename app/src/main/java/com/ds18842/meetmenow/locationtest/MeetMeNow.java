@@ -13,7 +13,7 @@ public class MeetMeNow extends Application{
     public LogicManager logicManager;
     private NetworkManager networkManager;
     private RoutingManager routingManager;
-    private PeerManager peerManager;
+    public PeerManager peerManager;
 
     public MeetMeNow(){
 
@@ -45,6 +45,6 @@ public class MeetMeNow extends Application{
         logicManager.setSender(routingManager);
         routingManager.setSender(networkManager);
 
-        peerManager.discoverPeers();
+        //peerManager.discoverPeers();
     }
 }

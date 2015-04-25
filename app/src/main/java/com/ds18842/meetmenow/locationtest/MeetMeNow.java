@@ -31,7 +31,7 @@ public class MeetMeNow extends Application{
 
         logicManager = new LogicManager(this);
         geoLocationManager = new GeoLocationManager(this);
-        peerManager = new PeerManager();
+        peerManager = new PeerManager(this);
         networkManager = new NetworkManager(this, logicManager, peerManager);
         routingManager = new RoutingManager(this, logicManager, peerManager);
 
@@ -40,8 +40,11 @@ public class MeetMeNow extends Application{
         //========================================= Set Upstream Message
         networkManager.setReceiver(routingManager);
         routingManager.setReceiver(logicManager);
+        peerManager.setReceiver(networkManager);
         //========================================= Set Downstrean Message
         logicManager.setSender(routingManager);
         routingManager.setSender(networkManager);
+
+        peerManager.discoverPeers();
     }
 }

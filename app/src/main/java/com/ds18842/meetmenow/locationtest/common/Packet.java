@@ -5,7 +5,7 @@ import android.os.Parcelable;
 
 public class Packet{
     //implements Parcelable {
-    public static final int MAX_TTL = 20, BROADCAST = 1, LOCATION = 2, NETWORK = 3, RESPONSE = 4;
+    public static final int MAX_TTL = 20, BROADCAST = 1, LOCATION = 2, NETWORK = 3, RESPONSE = 4, EXCHANGE = 5, ACK = 6;
     private static int MSG_NUM = 0 ;
 
     private Node src, dst, prev, next ;

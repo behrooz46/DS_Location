@@ -47,9 +47,12 @@ public class NetworkManager implements IMessageHandler {
 
         Node node = msg.getNext() ;
         Neighbour next = peerManager.getNeighbor(node);
-        IDevice device = next.getDevice() ;
-        ISocket socket = next.getSocket();
+        //IDevice device = next.getDevice() ;
+        //ISocket socket = next.getSocket();
         //TODO send msg over socket to device
+
+        peerManager.setState(PeerManager.SENDING);
+        peerManager.commWithPeer(next.getNode());
     }
 
     @Override

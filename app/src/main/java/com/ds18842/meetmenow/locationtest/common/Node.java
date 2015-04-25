@@ -9,9 +9,12 @@ public class Node implements Parcelable, Serializable{
     String name ;
     GeoLocation geoLocation ;
 
-    public Node(String name, GeoLocation geoLocation) {
+    String address;
+
+    public Node(String name, GeoLocation geoLocation, String address) {
         this.name = name;
         this.geoLocation = geoLocation;
+        this.address = address;
     }
 
     public GeoLocation getGeoLocation() {
@@ -22,9 +25,14 @@ public class Node implements Parcelable, Serializable{
         return name;
     }
 
+    public String getAddress() {
+        return address;
+    }
+
     public Node(Parcel pc){
         this.name = pc.readString() ;
         this.geoLocation = pc.readParcelable(GeoLocation.class.getClassLoader()) ;
+        this.address = pc.readString();
     }
 
     @Override
@@ -36,6 +44,7 @@ public class Node implements Parcelable, Serializable{
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(name);
         dest.writeParcelable(geoLocation, flags);
+        dest.writeString(address);
     }
 
     public void setGeoLocation(GeoLocation geoLocation) {
@@ -44,5 +53,9 @@ public class Node implements Parcelable, Serializable{
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 }

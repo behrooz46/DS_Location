@@ -27,9 +27,13 @@ import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
+import android.net.wifi.p2p.WifiP2pManager.ConnectionInfoListener;
+import android.net.wifi.p2p.WifiP2pManager.ChannelListener;
+
+
 import android.util.Log;
 
-public class PeerManager implements PeerListListener, WifiP2pManager.ConnectionInfoListener {
+public class PeerManager implements PeerListListener, ConnectionInfoListener, ChannelListener {
     //TODO Discovery
     //TODO establish connection : exchange location
     //TODO after exchanging location, add that to list of neighbors and update logic about the new node
@@ -66,6 +70,7 @@ public class PeerManager implements PeerListListener, WifiP2pManager.ConnectionI
     public static final int NEW = 0, EXCHANGE = 1, NORMAL = 2, SENDING = 3;
     private int state = NEW;
     private boolean hasInitDiscovery = false;
+    private boolean retryChannel = false;
 
 
     //private boolean success = false;
@@ -164,9 +169,14 @@ public class PeerManager implements PeerListListener, WifiP2pManager.ConnectionI
         peers.addAll(peerList.getDeviceList());
         if (peers.size() == 0) {
             Log.d(TAG, "No devices found");
+            //Log.d(TAG, manager.W);
 
             if (state == NEW) {
                 state = NORMAL;
+            }
+
+            if (state == NORMAL) {
+
             }
 
             return;
@@ -712,9 +722,20 @@ public class PeerManager implements PeerListListener, WifiP2pManager.ConnectionI
 
     public void commWithPeer(Node node) {
         final WifiP2pConfig config = new WifiP2pConfig();
-        config.deviceAddress = node.getAddress();
 
+        for (WifiP2pDevice peer : peers) {
+            if (peer.deviceName.equals(node.getName())) {
+                config.deviceAddress = peer.deviceAddress;
+            }
+        }
+        if (config.deviceAddress == null) {
+            Log.d(TAG, "Cannot find device address from peers");
+            return;
+        }
+
+        //config.deviceAddress = node.getAddress();
         config.wps.setup = WpsInfo.PBC;
+        config.groupOwnerIntent = 15;
 
         Log.d(TAG, "Connecting to :" + node.getName() + " " + node.getAddress());
 
@@ -728,9 +749,9 @@ public class PeerManager implements PeerListListener, WifiP2pManager.ConnectionI
         thread.start();
 
         try {
-            Log.d(TAG, "Exchange Before sleep");
+            Log.d(TAG, "commWithPeer before sleep");
             Thread.sleep(1000);
-            Log.d(TAG, "Exchange After sleep");
+            Log.d(TAG, "commWithPeer after sleep");
 
         }
         catch (Exception e) {
@@ -825,6 +846,18 @@ public class PeerManager implements PeerListListener, WifiP2pManager.ConnectionI
             }
         });
         Log.d(TAG, "Leave disconnect");
+    }
+
+    @Override
+    public void onChannelDisconnected() {
+        // we will try once more
+        if (manager != null && !retryChannel) {
+            Log.d(TAG, "Channel lost. Trying again");
+            //retryChannel = true;
+            channel = manager.initialize(context, context.getMainLooper(), null);
+        } else {
+            Log.d(TAG, "Severe! Channel is probably lost premanently. Try Disable/Re-Enable P2P.");
+        }
     }
 
 

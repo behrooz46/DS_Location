@@ -67,6 +67,11 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
 
     public static String TAG = "PeerManager";
     private static final int SOCKET_TIMEOUT = 10000;
+    private static final int CLIENT_INITIAL_SLEEP_TIME = 1000;
+    private static final int DISCOVERY_MAX_TIME = 5000;
+    private static final int DISCOVERY_RETRY_INTERVAL = 5000;
+
+
 
     private int SERVER_PORT = 8988;
 
@@ -178,7 +183,15 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
         peers.addAll(peerList.getDeviceList());
         if (peers.size() == 0) {
             Log.d(TAG, "No device found");
-            //Log.d(TAG, manager.W);
+
+            mainActivity.runOnUiThread(new Runnable()
+            {
+                public void run()
+                {
+                    Toast.makeText(mainActivity, "No device found",
+                        Toast.LENGTH_SHORT).show();
+                }
+            });
 
             if (state == NEW) {
                 state = NORMAL;
@@ -188,7 +201,7 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
                 Thread t = new Thread() {
                     public void run() {
                         try {
-                            sleep(10000);
+                            sleep(DISCOVERY_RETRY_INTERVAL);
                         }
                         catch(Exception e) {
                             e.printStackTrace();
@@ -210,14 +223,18 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
                 t.start();
             }
 
-            /*if (state == NORMAL) {
-
-            }*/
-
             return;
         }
 
         Log.d(TAG, "Peers: " + peers.size());
+        mainActivity.runOnUiThread(new Runnable()
+        {
+            public void run()
+            {
+                Toast.makeText(mainActivity, "Peers: " + peers.size(),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
 
         if (state == NEW) {
             state = EXCHANGE;
@@ -353,7 +370,7 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
     public void newNodeClientOperation() {
         Log.d(TAG, "New Node Client");
         try {
-            Thread.sleep(2000);
+            Thread.sleep(CLIENT_INITIAL_SLEEP_TIME);
         }
         catch(Exception e) {
             e.printStackTrace();
@@ -508,7 +525,7 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
                 Toast.LENGTH_SHORT).show();
         Log.d(TAG, "Normal Node Client");
         try {
-            Thread.sleep(2000);
+            Thread.sleep(CLIENT_INITIAL_SLEEP_TIME);
         }
         catch(Exception e) {
             e.printStackTrace();
@@ -658,7 +675,7 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
                 Toast.LENGTH_SHORT).show();
         Log.d(TAG, "Sending Node Client");
         try {
-            Thread.sleep(2000);
+            Thread.sleep(CLIENT_INITIAL_SLEEP_TIME);
         }
         catch(Exception e) {
             e.printStackTrace();
@@ -730,7 +747,7 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
                 Thread t = new Thread() {
                     public void run() {
                         try {
-                            Thread.sleep(5000);
+                            Thread.sleep(DISCOVERY_MAX_TIME);
                         }
                         catch (Exception e) {
                             e.printStackTrace();

@@ -70,5 +70,9 @@ public class Packet implements Serializable {
 //        dest.writeString(payload);
 //    }
 
+    @Override
+    public String toString() {
+        return src.toString() + ", " + type;
+    }
 
 }

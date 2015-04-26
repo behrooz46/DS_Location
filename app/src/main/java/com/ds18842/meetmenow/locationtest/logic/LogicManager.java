@@ -52,14 +52,24 @@ public class LogicManager implements IMessageHandler, ILocationHandler {
                 }
             }
         }else if (msg.getType() == Packet.LOCATION ){
-            String name = msg.getSrc().getName() ;
-            GeoLocation pos = msg.getSrc().getGeoLocation();
-            String instruction = (String) msg.getPayload() ;
+            final String name = msg.getSrc().getName() ;
+            final GeoLocation pos = msg.getSrc().getGeoLocation();
+            final String instruction = (String) msg.getPayload() ;
 
             if (mainActivity != null) {
-                dstLocation.setLatitude(pos.getLat());
-                dstLocation.setLongitude(pos.getLng());
-                mainActivity.showRequest(name, instruction, pos);
+                //dstLocation.setLatitude(pos.getLat());
+                //dstLocation.setLongitude(pos.getLng());
+                dstLocation.setLatitude(37.397941);
+                dstLocation.setLongitude(-122.035475);
+
+                mainActivity.runOnUiThread(new Runnable()
+                {
+                    public void run()
+                    {
+                        //Do your UI operations like dialog opening or Toast here
+                        mainActivity.showRequest(name, instruction, pos);
+                    }
+                });
             }
         }else if (msg.getType() == Packet.RESPONSE ){
             String name = msg.getSrc().getName() ;

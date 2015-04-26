@@ -4,11 +4,13 @@ import com.ds18842.meetmenow.locationtest.common.IMessageHandler;
 import com.ds18842.meetmenow.locationtest.common.Node;
 import com.ds18842.meetmenow.locationtest.common.Packet;
 import com.ds18842.meetmenow.locationtest.network.infrastructure.Neighbour;
+import com.ds18842.meetmenow.locationtest.views.MainActivity;
 
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -32,6 +34,7 @@ import android.net.wifi.p2p.WifiP2pManager.ChannelListener;
 
 
 import android.util.Log;
+import android.widget.Toast;
 
 public class PeerManager implements PeerListListener, ConnectionInfoListener, ChannelListener {
     //TODO Discovery
@@ -63,7 +66,7 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
     private Node me;
 
     public static String TAG = "PeerManager";
-    private static final int SOCKET_TIMEOUT = 5000;
+    private static final int SOCKET_TIMEOUT = 10000;
 
     private int SERVER_PORT = 8988;
 
@@ -71,6 +74,8 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
     private int state = NEW;
     private boolean hasInitDiscovery = false;
     private boolean retryChannel = false;
+
+    private MainActivity mainActivity;
 
 
     //private boolean success = false;
@@ -158,6 +163,10 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
         this.packetNow = packetNow;
     }
 
+    public void setMainActivity(MainActivity mainActivity) {
+        this.mainActivity = mainActivity;
+    }
+
     @Override
     public void onPeersAvailable(WifiP2pDeviceList peerList) {
         if (state == EXCHANGE) return;
@@ -168,16 +177,42 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
         peers.clear();
         peers.addAll(peerList.getDeviceList());
         if (peers.size() == 0) {
-            Log.d(TAG, "No devices found");
+            Log.d(TAG, "No device found");
             //Log.d(TAG, manager.W);
 
             if (state == NEW) {
                 state = NORMAL;
             }
 
-            if (state == NORMAL) {
+            if (state == NORMAL && hasInitDiscovery) {
+                Thread t = new Thread() {
+                    public void run() {
+                        try {
+                            sleep(10000);
+                        }
+                        catch(Exception e) {
+                            e.printStackTrace();
+                        }
+                        Log.d(TAG, "NoDevFound discoverPeers");
+                        manager.discoverPeers(channel, new WifiP2pManager.ActionListener() {
+                            @Override
+                            public void onSuccess() {
+                                Log.d(TAG, "NoDevFound discoverPeers success");
+                            }
 
+                            @Override
+                            public void onFailure(int reason) {
+                                Log.d(TAG, "NoDevFound discoverPeers failure");
+                            }
+                        });
+                    }
+                };
+                t.start();
             }
+
+            /*if (state == NORMAL) {
+
+            }*/
 
             return;
         }
@@ -210,6 +245,9 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
 
     @Override
     public void onConnectionInfoAvailable(final WifiP2pInfo info) {
+
+        Toast.makeText(mainActivity, "Enter onConnectionInfo",
+                Toast.LENGTH_SHORT).show();
 
         Log.d(TAG, "Enter onConnectionInfo");
         Log.d(TAG, "isGroup:" + String.valueOf(info.groupFormed));
@@ -348,6 +386,9 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
                     ObjectInputStream inStream = new ObjectInputStream(in);
 
                     Packet inPacket = (Packet) inStream.readObject();
+
+                    Log.d(TAG, "Receive: " + inPacket.getPayload());
+
                     neighbours.add(new Neighbour(inPacket.getSrc()));
 
                     // TODO Add nodes here, maybe changed later
@@ -358,8 +399,6 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
                             nodes.put(key, top.get(key));
                         }
                     }
-
-                    Log.d(TAG, "Receive: " + inPacket.getPayload());
 
                     in.close();
                     inStream.close();
@@ -391,10 +430,13 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
 
 
     public void normalNodeOwnerOperation() {
+        Toast.makeText(mainActivity, "Normal Node Owner",
+                Toast.LENGTH_SHORT).show();
         Log.d(TAG, "Normal Node Owner");
         Thread server = new Thread() {
             public void run() {
                 try {
+
                     ServerSocket serverSocket = new ServerSocket(SERVER_PORT);
                     Socket clientSocket = serverSocket.accept();
                     Log.d(TAG, clientSocket.getInetAddress().getHostAddress());
@@ -462,6 +504,8 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
 
 
     public void normalNodeClientOperation() {
+        Toast.makeText(mainActivity, "Normal Node Client",
+                Toast.LENGTH_SHORT).show();
         Log.d(TAG, "Normal Node Client");
         try {
             Thread.sleep(2000);
@@ -486,11 +530,12 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
                     OutputStream out = socket.getOutputStream();
                     ObjectOutputStream outStream = new ObjectOutputStream(out);
 
-                    Packet initPacket = new Packet(null, null, Packet.EXCHANGE, "Initial");
+                    Packet initPacket = new Packet(new Node(device.deviceName, null, device.deviceAddress)
+                            , null, Packet.EXCHANGE, "Initial");
 
                     outStream.writeObject(initPacket);
 
-                    Log.d(TAG, "Sending: " + initPacket.toString());
+                    Log.d(TAG, "Sending: " + initPacket.getPayload());
 
                     InputStream in = socket.getInputStream();
                     ObjectInputStream inStream = new ObjectInputStream(in);
@@ -554,6 +599,8 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
 
 
     public void sendingNodeOwnerOperation() {
+        Toast.makeText(mainActivity, "Sending Node Owner",
+                Toast.LENGTH_SHORT).show();
         Log.d(TAG, "Sending Node Owner");
         Thread server = new Thread() {
             public void run() {
@@ -607,7 +654,9 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
 
 
     public void sendingNodeClientOperation() {
-        Log.d(TAG, "Normal Node Client");
+        Toast.makeText(mainActivity, "Sending Node Client",
+                Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "Sending Node Client");
         try {
             Thread.sleep(2000);
         }
@@ -737,7 +786,7 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
         config.wps.setup = WpsInfo.PBC;
         config.groupOwnerIntent = 15;
 
-        Log.d(TAG, "Connecting to :" + node.getName() + " " + node.getAddress());
+        Log.d(TAG, "Connecting to: " + node.getName() + " " + node.getAddress());
 
         Thread thread = new Thread(){
             public void run(){
@@ -832,12 +881,55 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
                     e.printStackTrace();
                 }
 
-                manager.removeGroup(channel, this);
+                synchronized (manager) {
+                    manager.removeGroup(channel, this);
+                }
+
             }
 
             @Override
             public void onSuccess() {
                 Log.d(TAG, "Disconnect succeeded");
+
+                /*manager = (WifiP2pManager) context.getSystemService(Context.WIFI_P2P_SERVICE);
+                channel = manager.initialize(context, context.getMainLooper(), null);
+
+                try {
+                    Class<?> wifiManager = Class
+                            .forName("android.net.wifi.p2p.WifiP2pManager");
+
+                    Method method = wifiManager
+                            .getMethod(
+                                    "enableP2p",
+                                    new Class[] { android.net.wifi.p2p.WifiP2pManager.Channel.class });
+
+                    method.invoke(manager, channel);
+
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+
+                try {
+                    Thread.sleep(1000);
+                }
+                catch(Exception e) {
+                    e.printStackTrace();
+                }*/
+
+                synchronized (this) {
+                    manager.discoverPeers(channel, new WifiP2pManager.ActionListener() {
+                        @Override
+                        public void onSuccess() {
+                            Log.d(TAG, "disconnect: discover success");
+                        }
+
+                        @Override
+                        public void onFailure(int reason) {
+                            Log.d(TAG, "disconnect: discover fail");
+                        }
+                    });
+                }
 
                 Log.d(TAG, "disconnect: before release: " + connSem.availablePermits());
                 connSem.release();
@@ -858,6 +950,27 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
         } else {
             Log.d(TAG, "Severe! Channel is probably lost premanently. Try Disable/Re-Enable P2P.");
         }
+
+        //Log.d(TAG, "onChannelDisconnected: reset manager and channel");
+
+        /*manager = (WifiP2pManager) context.getSystemService(Context.WIFI_P2P_SERVICE);
+        channel = manager.initialize(context, context.getMainLooper(), null);
+
+        try {
+            Class<?> wifiManager = Class
+                    .forName("android.net.wifi.p2p.WifiP2pManager");
+
+            Method method = wifiManager
+                    .getMethod(
+                            "enableP2p",
+                            new Class[] { android.net.wifi.p2p.WifiP2pManager.Channel.class });
+
+            method.invoke(manager, channel);
+
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }*/
     }
 
 

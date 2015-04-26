@@ -87,12 +87,16 @@ public class MainActivity extends ActionBarActivity{
     protected void onPause() {
         super.onPause();
         app.logicManager.setMainActivity(this);
+
+        app.peerManager.setMainActivity(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         app.logicManager.setMainActivity(this);
+
+        app.peerManager.setMainActivity(this);
 
         txt_result.setVisibility(View.INVISIBLE);
     }

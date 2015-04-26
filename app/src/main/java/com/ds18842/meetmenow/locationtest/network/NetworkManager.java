@@ -87,4 +87,8 @@ public class NetworkManager implements IMessageHandler {
     public HashMap<String, Node> getNodes() {
         return app.getNodes();
     }
+
+    public Node getSelfNode() {
+        return app.getSelfNode();
+    }
 }

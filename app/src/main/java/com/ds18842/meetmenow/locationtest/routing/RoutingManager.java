@@ -71,7 +71,13 @@ public class RoutingManager implements IMessageHandler {
                 best = neighbor.getNode() ;
             }
         }*/
-        best = neighbors.get(0).getNode();
+        //best = neighbors.get(0).getNode();
+
+        for (Neighbour neighbor : neighbors) {
+            if (neighbor.getNode().getName().equals(msg.getDst().getName())) {
+                best = neighbor.getNode();
+            }
+        }
 
         if (amIequalTo(best)) {
             //TODO there's no node to send it to.

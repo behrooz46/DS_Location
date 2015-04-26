@@ -335,7 +335,7 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
 
                     OutputStream out = clientSocket.getOutputStream();
                     ObjectOutputStream outputStream = new ObjectOutputStream(out);
-                    Node src = new Node(device.deviceName, null, device.deviceAddress);
+                    Node src = new Node(me.getName(), null, device.deviceAddress);
                     Packet outPacket = new Packet(src, null, Packet.EXCHANGE, receiver.getNodes());
 
                     outputStream.writeObject(outPacket);
@@ -415,7 +415,7 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
                     OutputStream out = socket.getOutputStream();
                     ObjectOutputStream outStream = new ObjectOutputStream(out);
 
-                    Node src = new Node(device.deviceName, null, device.deviceAddress);
+                    Node src = new Node(me.getName(), null, device.deviceAddress);
                     Packet outPacket = new Packet(src, null, Packet.EXCHANGE, receiver.getNodes());
 
                     outStream.writeObject(outPacket);
@@ -502,7 +502,9 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
                     ObjectOutputStream outputStream = new ObjectOutputStream(out);
 
                     Packet outPacket;
-                    Node src = new Node(device.deviceName, null, device.deviceAddress);
+
+                    // TODO Change name to the real name, not the device name
+                    Node src = new Node(me.getName(), null, device.deviceAddress);
 
                     if (inPacket.getType() == Packet.EXCHANGE) {
                         // TODO Add nodes here, maybe changed later
@@ -601,7 +603,8 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
 
                     Log.d(TAG, "Receive: " + inPacket.toString());
 
-                    Node src = new Node(device.deviceName, null, device.deviceAddress);
+                    // TODO Change name to the real name, not the device name
+                    Node src = new Node(me.getName(), null, device.deviceAddress);
 
                     Packet outPacket;
                     if (inPacket.getType() == Packet.EXCHANGE) {
@@ -678,8 +681,6 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
 
                     OutputStream out = clientSocket.getOutputStream();
                     ObjectOutputStream outputStream = new ObjectOutputStream(out);
-                    //Node src = new Node(device.deviceName, null, device.deviceAddress);
-                    //Packet outPacket = new Packet(src, null, Packet.EXCHANGE, "Old Location");
 
                     outputStream.writeObject(packetNow);
 
@@ -785,6 +786,8 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
 
     public void discoverPeers() {
 
+        me = receiver.getSelfNode();
+
         final PeerManager peerManager = this;
         hasInitDiscovery = true;
 
@@ -841,11 +844,20 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
     public void commWithPeer(Node node) {
         final WifiP2pConfig config = new WifiP2pConfig();
 
-        for (WifiP2pDevice peer : peers) {
+        /*for (WifiP2pDevice peer : peers) {
             if (peer.deviceName.equals(node.getName())) {
                 config.deviceAddress = peer.deviceAddress;
             }
+        }*/
+
+        for (WifiP2pDevice peer : peers) {
+            if (peer.deviceAddress.equals(node.getAddress())) {
+                config.deviceAddress = peer.deviceAddress;
+            }
         }
+
+        //config.deviceAddress = node.getAddress();
+
         if (config.deviceAddress == null) {
             Log.d(TAG, "Cannot find device address from peers");
             return;

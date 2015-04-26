@@ -71,8 +71,6 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
     private static final int DISCOVERY_MAX_TIME = 5000;
     private static final int DISCOVERY_RETRY_INTERVAL = 5000;
 
-
-
     private int SERVER_PORT = 8988;
 
     public static final int NEW = 0, EXCHANGE = 1, NORMAL = 2, SENDING = 3;
@@ -263,8 +261,17 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
     @Override
     public void onConnectionInfoAvailable(final WifiP2pInfo info) {
 
-        Toast.makeText(mainActivity, "Enter onConnectionInfo",
-                Toast.LENGTH_SHORT).show();
+        mainActivity.runOnUiThread(new Runnable()
+        {
+            public void run()
+            {
+                Toast.makeText(mainActivity, "Enter onConnectionInfo",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        //Toast.makeText(mainActivity, "Enter onConnectionInfo",
+        //        Toast.LENGTH_SHORT).show();
 
         Log.d(TAG, "Enter onConnectionInfo");
         Log.d(TAG, "isGroup:" + String.valueOf(info.groupFormed));
@@ -304,6 +311,14 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
 
 
     public void newNodeOwnerOperation() {
+        mainActivity.runOnUiThread(new Runnable()
+        {
+            public void run()
+            {
+                Toast.makeText(mainActivity, "New Node Owner",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
         Log.d(TAG, "New Node Owner");
         Thread server = new Thread() {
             public void run() {
@@ -368,6 +383,14 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
 
 
     public void newNodeClientOperation() {
+        mainActivity.runOnUiThread(new Runnable()
+        {
+            public void run()
+            {
+                Toast.makeText(mainActivity, "New Node Client",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
         Log.d(TAG, "New Node Client");
         try {
             Thread.sleep(CLIENT_INITIAL_SLEEP_TIME);
@@ -447,8 +470,15 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
 
 
     public void normalNodeOwnerOperation() {
-        Toast.makeText(mainActivity, "Normal Node Owner",
-                Toast.LENGTH_SHORT).show();
+        mainActivity.runOnUiThread(new Runnable()
+        {
+            public void run()
+            {
+                Toast.makeText(mainActivity, "Normal Node Owner",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+
         Log.d(TAG, "Normal Node Owner");
         Thread server = new Thread() {
             public void run() {
@@ -521,8 +551,14 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
 
 
     public void normalNodeClientOperation() {
-        Toast.makeText(mainActivity, "Normal Node Client",
-                Toast.LENGTH_SHORT).show();
+        mainActivity.runOnUiThread(new Runnable()
+        {
+            public void run()
+            {
+                Toast.makeText(mainActivity, "Normal Node Client",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
         Log.d(TAG, "Normal Node Client");
         try {
             Thread.sleep(CLIENT_INITIAL_SLEEP_TIME);
@@ -616,8 +652,14 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
 
 
     public void sendingNodeOwnerOperation() {
-        Toast.makeText(mainActivity, "Sending Node Owner",
-                Toast.LENGTH_SHORT).show();
+        mainActivity.runOnUiThread(new Runnable()
+        {
+            public void run()
+            {
+                Toast.makeText(mainActivity, "Sending Node Owner",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
         Log.d(TAG, "Sending Node Owner");
         Thread server = new Thread() {
             public void run() {
@@ -671,8 +713,15 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
 
 
     public void sendingNodeClientOperation() {
-        Toast.makeText(mainActivity, "Sending Node Client",
-                Toast.LENGTH_SHORT).show();
+        mainActivity.runOnUiThread(new Runnable()
+        {
+            public void run()
+            {
+                Toast.makeText(mainActivity, "Sending Node Client",
+                    Toast.LENGTH_SHORT).show();
+            }
+        });
+
         Log.d(TAG, "Sending Node Client");
         try {
             Thread.sleep(CLIENT_INITIAL_SLEEP_TIME);
@@ -757,6 +806,9 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
                             Log.d(TAG, "Request for empty peers");
                             manager.requestPeers(channel, peerManager);
                         }
+                        else {
+                            manager.requestPeers(channel, peerManager);
+                        }
                     }
                 };
                 t.start();
@@ -803,6 +855,16 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
         config.wps.setup = WpsInfo.PBC;
         config.groupOwnerIntent = 15;
 
+        final Node nodeTmp = node;
+        mainActivity.runOnUiThread(new Runnable()
+        {
+            public void run()
+            {
+                Toast.makeText(mainActivity, "Connecting to: " + nodeTmp.getName() + " " + nodeTmp.getAddress(),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+
         Log.d(TAG, "Connecting to: " + node.getName() + " " + node.getAddress());
 
         Thread thread = new Thread(){
@@ -824,12 +886,10 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
             e.printStackTrace();
         }
 
-        //connLock.lock();
         try {
             Log.d(TAG, "commWithPeer: before acquire: " + connSem.availablePermits());
             connSem.acquire();
             Log.d(TAG, "commWithPeer: after acquire: " + connSem.availablePermits());
-
 
         }
         catch (Exception e) {
@@ -841,9 +901,11 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
         disconnect();
     }
 
+
     public WifiP2pManager getWifiP2pManager() {
         return this.manager;
     }
+
 
     public WifiP2pManager.Channel getWifiP2pChannel() {
         return this.channel;
@@ -851,6 +913,15 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
 
 
     public void connect(WifiP2pConfig config) {
+
+        mainActivity.runOnUiThread(new Runnable()
+        {
+            public void run()
+            {
+                Toast.makeText(mainActivity, "Enter connect",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
         Log.d(TAG, "Enter connect");
 
         try {
@@ -863,13 +934,19 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
             e.printStackTrace();
         }
 
-        //Log.d(TAG, "After acquire connSem in connect");
-
         manager.connect(channel, config, new WifiP2pManager.ActionListener() {
 
             @Override
             public void onSuccess() {
                 // WiFiDirectBroadcastReceiver will notify us. Ignore for now.
+                mainActivity.runOnUiThread(new Runnable()
+                {
+                    public void run()
+                    {
+                        Toast.makeText(mainActivity, "Connect onSuccess.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
                 Log.d(TAG, "connect onSuccess.");
             }
 
@@ -882,6 +959,7 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
         Log.d(TAG, "Leaving connect");
 
     }
+
 
     public void disconnect() {
         Log.d(TAG, "Enter disconnect");
@@ -907,32 +985,6 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
             @Override
             public void onSuccess() {
                 Log.d(TAG, "Disconnect succeeded");
-
-                /*manager = (WifiP2pManager) context.getSystemService(Context.WIFI_P2P_SERVICE);
-                channel = manager.initialize(context, context.getMainLooper(), null);
-
-                try {
-                    Class<?> wifiManager = Class
-                            .forName("android.net.wifi.p2p.WifiP2pManager");
-
-                    Method method = wifiManager
-                            .getMethod(
-                                    "enableP2p",
-                                    new Class[] { android.net.wifi.p2p.WifiP2pManager.Channel.class });
-
-                    method.invoke(manager, channel);
-
-                } catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-
-                try {
-                    Thread.sleep(1000);
-                }
-                catch(Exception e) {
-                    e.printStackTrace();
-                }*/
 
                 synchronized (this) {
                     manager.discoverPeers(channel, new WifiP2pManager.ActionListener() {
@@ -967,27 +1019,6 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
         } else {
             Log.d(TAG, "Severe! Channel is probably lost premanently. Try Disable/Re-Enable P2P.");
         }
-
-        //Log.d(TAG, "onChannelDisconnected: reset manager and channel");
-
-        /*manager = (WifiP2pManager) context.getSystemService(Context.WIFI_P2P_SERVICE);
-        channel = manager.initialize(context, context.getMainLooper(), null);
-
-        try {
-            Class<?> wifiManager = Class
-                    .forName("android.net.wifi.p2p.WifiP2pManager");
-
-            Method method = wifiManager
-                    .getMethod(
-                            "enableP2p",
-                            new Class[] { android.net.wifi.p2p.WifiP2pManager.Channel.class });
-
-            method.invoke(manager, channel);
-
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }*/
     }
 
 

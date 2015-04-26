@@ -335,7 +335,7 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
 
                     OutputStream out = clientSocket.getOutputStream();
                     ObjectOutputStream outputStream = new ObjectOutputStream(out);
-                    Node src = new Node(me.getName(), null, device.deviceAddress);
+                    Node src = me;
                     Packet outPacket = new Packet(src, null, Packet.EXCHANGE, receiver.getNodes());
 
                     outputStream.writeObject(outPacket);
@@ -415,7 +415,8 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
                     OutputStream out = socket.getOutputStream();
                     ObjectOutputStream outStream = new ObjectOutputStream(out);
 
-                    Node src = new Node(me.getName(), null, device.deviceAddress);
+                    //TODO should send location as well.
+                    Node src = me;
                     Packet outPacket = new Packet(src, null, Packet.EXCHANGE, receiver.getNodes());
 
                     outStream.writeObject(outPacket);
@@ -504,7 +505,7 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
                     Packet outPacket;
 
                     // TODO Change name to the real name, not the device name
-                    Node src = new Node(me.getName(), null, device.deviceAddress);
+                    Node src = me;
 
                     if (inPacket.getType() == Packet.EXCHANGE) {
                         // TODO Add nodes here, maybe changed later
@@ -604,7 +605,7 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
                     Log.d(TAG, "Receive: " + inPacket.toString());
 
                     // TODO Change name to the real name, not the device name
-                    Node src = new Node(me.getName(), null, device.deviceAddress);
+                    Node src = me;
 
                     Packet outPacket;
                     if (inPacket.getType() == Packet.EXCHANGE) {
@@ -787,6 +788,7 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
     public void discoverPeers() {
 
         me = receiver.getSelfNode();
+        me.setDeviceAddress(device.deviceAddress);
 
         final PeerManager peerManager = this;
         hasInitDiscovery = true;

@@ -63,4 +63,8 @@ public class Node implements Parcelable, Serializable{
     public String toString() {
         return "(" + name + ", " + address + ")";
     }
+
+    public void setDeviceAddress(String deviceAddress) {
+        this.address = deviceAddress;
+    }
 }

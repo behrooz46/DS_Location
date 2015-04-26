@@ -57,12 +57,12 @@ public class LogicManager implements IMessageHandler, ILocationHandler {
             final String instruction = (String) msg.getPayload() ;
 
             if (mainActivity != null) {
-                //dstLocation.setLatitude(pos.getLat());
-                //dstLocation.setLongitude(pos.getLng());
+                dstLocation.setLatitude(pos.getLat());
+                dstLocation.setLongitude(pos.getLng());
 
                 // TODO Use real location
-                dstLocation.setLatitude(37.397941);
-                dstLocation.setLongitude(-122.035475);
+//                dstLocation.setLatitude(37.397941);
+//                dstLocation.setLongitude(-122.035475);
 
                 mainActivity.runOnUiThread(new Runnable()
                 {

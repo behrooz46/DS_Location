@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 public class Packet implements Serializable {
     //implements Parcelable {
-    public static final int MAX_TTL = 20, BROADCAST = 1, LOCATION = 2, NETWORK = 3, RESPONSE = 4, EXCHANGE = 5, ACK = 6;
+    public static final int MAX_TTL = 20, FLOOD = 1, LOCATION = 2, NETWORK = 3, RESPONSE = 4, EXCHANGE = 5, ACK = 6;
     private static int MSG_NUM = 0 ;
 
     private Node src, dst, prev, next ;

@@ -2,14 +2,11 @@ package com.ds18842.meetmenow.locationtest.logic;
 
 import android.content.Context;
 import android.location.Location;
-import android.os.Message;
 import android.util.Log;
 
 import com.ds18842.meetmenow.locationtest.common.* ;
-import com.ds18842.meetmenow.locationtest.network.infrastructure.* ;
 import com.ds18842.meetmenow.locationtest.views.MainActivity;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -33,7 +30,6 @@ public class LogicManager implements IMessageHandler, ILocationHandler {
         nodes = new HashMap<String, Node>();
 
         dstLocation = new Location("dummyprovider");
-
         dstLocation.setLatitude(37.397941);
         dstLocation.setLongitude(-122.035475);
     }
@@ -59,15 +55,10 @@ public class LogicManager implements IMessageHandler, ILocationHandler {
             if (mainActivity != null) {
                 dstLocation.setLatitude(pos.getLat());
                 dstLocation.setLongitude(pos.getLng());
+                Log.d(TAG, "pos : (" + pos.getLat() + ", " + pos.getLng() + ")");
 
-                // TODO Use real location
-//                dstLocation.setLatitude(37.397941);
-//                dstLocation.setLongitude(-122.035475);
-
-                mainActivity.runOnUiThread(new Runnable()
-                {
-                    public void run()
-                    {
+                mainActivity.runOnUiThread(new Runnable() {
+                    public void run() {
                         //Do your UI operations like dialog opening or Toast here
                         mainActivity.showRequest(name, instruction, pos);
                     }
@@ -97,7 +88,7 @@ public class LogicManager implements IMessageHandler, ILocationHandler {
         //Boradcast this update
         Node src = me ;
         Node dst = me ;
-        broadcast(new Packet(src, dst, Packet.BROADCAST, "")) ;
+        broadcast(new Packet(src, dst, Packet.FLOOD, "")) ;
     }
 
     //Called by UI
@@ -182,5 +173,11 @@ public class LogicManager implements IMessageHandler, ILocationHandler {
 
     public Location getDstLocation() {
         return dstLocation;
+    }
+
+    public void updateBroadcast(Node src) {
+        synchronized (nodes){
+            nodes.put(src.getName(), src);
+        }
     }
 }

@@ -8,13 +8,12 @@ import com.ds18842.meetmenow.locationtest.common.IMessageHandler;
 import com.ds18842.meetmenow.locationtest.common.Packet;
 import com.ds18842.meetmenow.locationtest.common.Node;
 import com.ds18842.meetmenow.locationtest.logic.LogicManager;
-import com.ds18842.meetmenow.locationtest.network.infrastructure.IDevice;
-import com.ds18842.meetmenow.locationtest.network.infrastructure.ISocket;
 import com.ds18842.meetmenow.locationtest.network.infrastructure.Neighbour;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 public class NetworkManager implements IMessageHandler {
     private final Context context;
@@ -22,6 +21,7 @@ public class NetworkManager implements IMessageHandler {
     private LogicManager app;
     private Node me;
     private IMessageHandler receiver;
+    private Set<String> seenId;
 
     public static final String TAG = "NetworkManager";
 
@@ -30,33 +30,39 @@ public class NetworkManager implements IMessageHandler {
         this.peerManager = peerManager ;
         this.app = app ;
         this.me = app.getSelfNode();
+        this.seenId = new HashSet<String>();
     }
 
     public void setReceiver(IMessageHandler receiver) { this.receiver = receiver; }
 
     @Override
     public void receive(Packet msg) {
-        if (msg.getType() == Packet.BROADCAST){
-            //TODO check if it's a new broadcast to re-do
-            //TODO broadcast if #id of packet is new
-            //TODO update logic about this broadcast
+        String id = msg.getSrc().getName() + "-" + msg.getId() ;
+        if (hasSeen(id))
+            return ;
+
+        if (msg.getType() == Packet.FLOOD){
+            app.updateBroadcast(msg.getSrc());
             this.broadcast(msg);
         }else{
             receiver.receive(msg);
         }
     }
 
+    private boolean hasSeen(String id) {
+        if (seenId.contains(id)){
+            return true;
+        }
+        seenId.add(id);
+        return false;
+    }
+
     @Override
     public void send(Packet msg) {
-        //TODO reduce TTL by 1
-
         Log.d(TAG, "Enter send");
 
         Node node = msg.getNext() ;
         final Neighbour next = peerManager.getNeighbor(node);
-        //IDevice device = next.getDevice() ;
-        //ISocket socket = next.getSocket();
-        //TODO send msg over socket to device
 
         peerManager.setPacketNow(msg);
         peerManager.setState(PeerManager.SENDING);

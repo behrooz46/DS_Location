@@ -112,22 +112,6 @@ public class PeerManager implements PeerListListener, ConnectionInfoListener, Ch
         //state = NEW;
     }
 
-    /*public ArrayList<Neighbour> getNeighbours() {
-        //TODO return all neighbour
-        return this.neighbours;
-    }
-
-    public Neighbour getNeighbour(Node next) {
-        //TODO return neighbour from node
-
-        for (Neighbour neighbour : neighbours) {
-            if (neighbour.getNode().getName().equals(next.getName())) {
-                return neighbour;
-            }
-        }
-
-        return null ;
-    }*/
 
     public ArrayList<Neighbour> getNeighbors() {
         //TODO return all neighbour

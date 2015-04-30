@@ -14,7 +14,7 @@ public class GeoLocation implements Parcelable, Serializable {
 
     public GeoLocation(Location location){
         this.lng = location.getLongitude() ;
-        this.lat = location.getLongitude() ;
+        this.lat = location.getLatitude() ;
         this.time = location.getTime() ;
         this.accuracy = location.getAccuracy() ;
     }

@@ -30,8 +30,6 @@ public class LogicManager implements IMessageHandler, ILocationHandler {
         nodes = new HashMap<String, Node>();
 
         dstLocation = new Location("dummyprovider");
-        dstLocation.setLatitude(37.397941);
-        dstLocation.setLongitude(-122.035475);
     }
 
     public HashMap<String, Node> getNodes() {
